@@ -4,3 +4,4 @@ BeAnywhereIntent start a conference on {BeAnywhere}
 
 StopIntent stop the conference on {PN}
 StopIntent stop the conference on {BeAnywhere}
+StopIntent stop the conference

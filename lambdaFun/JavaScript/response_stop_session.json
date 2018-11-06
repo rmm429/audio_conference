@@ -7,6 +7,10 @@
 				"ssml": "<speak>Your conference was stopped. </speak>"
 			},
 			"shouldEndSession": true
+		},
+		"sessionAttributes": {
+			"startIntent": true,
+			"BeAnywhere": "my cell"
 		}
 	}
 }

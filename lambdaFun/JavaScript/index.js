@@ -28,15 +28,15 @@ exports.handler = function(event,context) {
 
             if (request.intent.name === "PNIntent") {
 
-                handleStartPNIntent(request,context);
+                handleStartPNIntent(request,context,session);
 
             } else if (request.intent.name === "BeAnywhereIntent") {
 
-                handleStartBeAnywhereIntent(request,context);
+                handleStartBeAnywhereIntent(request,context,session);
 
             } else if (request.intent.name === "StopIntent") {
                 
-                handleStopIntent(request,context);
+                handleStopIntent(request,context,session);
 
             } else {
                 throw("Unknown intent");
@@ -125,27 +125,59 @@ function handleLaunchRequest(context) {
     context.succeed(buildResponse(options));
 }
 
-function handleStartPNIntent(request,context) {
+function handleStartPNIntent(request,context,session) {
     let options = {};
     let PN = request.intent.slots.PN.value;
+    //Remembering the current session
+    options.session = session;
     options.speechText = `Your conference was started on <say-as interpret-as="telephone">${PN}</say-as>.`;
-    options.endSession = true;
+    //Noting that we are coming from a start intent
+    options.session.attributes.startIntent = true;
+    options.session.attributes.PN = PN;
+    options.endSession = false;
     context.succeed(buildResponse(options));
 }
 
-function handleStartBeAnywhereIntent(request,context) {
+function handleStartBeAnywhereIntent(request,context,session) {
     let options = {};
     let BeAnywhere = request.intent.slots.BeAnywhere.value;
+    //Remembering the current session
+    options.session = session;
     options.speechText = `Your conference was started on ${BeAnywhere}.`;
-    options.endSession = true;
+    //Noting that we are coming from a start intent
+    options.session.attributes.startIntent = true;
+    options.session.attributes.BeAnywhere = BeAnywhere;
+    options.endSession = false;
     context.succeed(buildResponse(options));
 }
 
-function handleStopIntent(request,context) {
+function handleStopIntent(request,context,session) {
     let options = {};
-    options.speechText = "Your conference was stopped.";
-    options.endSession = true;
-    context.succeed(buildResponse(options));
+    //Remembering the current session
+    options.session = session;
+
+    //Making sure we came from a start intent
+    if(session.attributes.startIntent)
+    {
+        //If a device was provided
+        if (request.intent.slots) {
+            //stop conference on the device that was provided
+            //stopConference(slot_device)
+        //If a device was not provided
+        } else {
+            //stop conference on the device that was in the previous session
+            //stopConference(session_device)
+        }
+
+        options.speechText = "Your conference was stopped.";
+        options.endSession = true;
+        context.succeed(buildResponse(options));
+
+    } else {
+        options.speechText = "Incorrect usage.To stop a conference, a conference must first be started.";
+		options.endSession = true;
+		context.succeed(buildResponse(options));
+    }
 }
 
 function addSpacing(text) {

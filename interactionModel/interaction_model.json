@@ -60,6 +60,7 @@
                         }
                     ],
                     "samples": [
+                        "stop the conference",
                         "stop the conference on {BeAnywhere}",
                         "stop the conference on {PN}"
                     ]

@@ -4,9 +4,9 @@
 		"response": {
 			"outputSpeech": {
 				"type": "SSML",
-				"ssml": "<speak>Your conference was started on my cell. </speak>"
+				"ssml": "<speak>Your conference was stopped. </speak>"
 			},
-			"shouldEndSession": false
+			"shouldEndSession": true
 		},
 		"sessionAttributes": {
 			"startIntent": true,

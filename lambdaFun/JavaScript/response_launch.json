@@ -4,13 +4,7 @@
 		"response": {
 			"outputSpeech": {
 				"type": "SSML",
-				"ssml": "<speak>Welcome to the Audio Conference skill.  Using this skill, you can start an audio conference on a telephone number or a Be Anywhere device. </speak>"
-			},
-			"reprompt": {
-				"outputSpeech": {
-					"type": "SSML",
-					"ssml": "<speak>You can say, for example, ask audio conference to start a conference on 215 555 1234, or, ask audio conference to start a conference on My Cell. </speak>"
-				}
+				"ssml": "<speak>Welcome to the Audio Conference skill.  Using this skill, you can start an audio conference on a telephone number or a Be Anywhere device.  You can say, for example, ask audio conference to start a conference on <say-as interpret-as=\"telephone\">2155551234</say-as>, or, ask audio conference to start a conference on My Cell. </speak>"
 			},
 			"shouldEndSession": true
 		}
