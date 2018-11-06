@@ -1,5 +1,9 @@
 'use strict';
 
+var startIntent = false;
+var PN_GLOBAL = "";
+var BeAnywhere_GLOBAL = "";
+
 //event = input JSON
 exports.handler = function(event,context) {
 
@@ -13,12 +17,6 @@ exports.handler = function(event,context) {
         //specific objects of the event JSON
 		var request = event.request;
         var session = event.session;
-        
-        //Session attributes: pass some information from one intent to another intent
-		//If there are no session attributes, create an empty object for them and place it in the event JSON
-		if(!event.session.attributes) {
-			event.session.attributes = {};
-        }
         
         if (request.type === "LaunchRequest") {
 
@@ -102,10 +100,6 @@ function buildResponse(options) {
         }
     }
 
-    if (options.session && options.session.attributes) {
-        response.sessionAttributes = options.session.attributes;
-    }
-
     //Outputting the output JSON to the console
     if(process.env.NODE_DEBUG_EN) {
 		console.log("\nResponse:\n" + JSON.stringify(response,null,2));
@@ -128,24 +122,22 @@ function handleStartIntent(request,context,session) {
     //Checking to see if slots exist
     if (request.intent.slots.PN.value || request.intent.slots.BeAnywhere.value)
     {
-        //Remembering the current session
-        options.session = session;
-
         //Noting that we are coming from the intent StartIntent
-        options.session.attributes.startIntent = true;
+        startIntent = true;
 
         //Checking to see which type of request is being made
         if (request.intent.slots.PN.value) {
             let PN = request.intent.slots.PN.value;
             options.speechText = `Your conference was started on <say-as interpret-as="telephone">${PN}</say-as>.`;
-            options.session.attributes.PN = PN;
+            PN_GLOBAL = PN;
         } else if (request.intent.slots.BeAnywhere.value) {
             let BeAnywhere = request.intent.slots.BeAnywhere.value;
             options.speechText = `Your conference was started on ${BeAnywhere}.`;
-            options.session.attributes.BeAnywhere = BeAnywhere;
+            BeAnywhere_GLOBAL = BeAnywhere;
         }
 
-        options.endSession = false;
+        //options.endSession = false;
+        options.endSession = true;
 
     } else {
 
@@ -159,28 +151,37 @@ function handleStartIntent(request,context,session) {
 function handleStopIntent(request,context,session) {
     let options = {};
 
-    //Making sure we came from a start intent
-    if(session.attributes.startIntent)
+    //Making sure we came from a the intent StartIntent
+    if(startIntent)
     {
         //If a device was provided
-        if (request.intent.slots) {
-            //stop conference on the device that was provided
-            //stopConference(slot_device)
+        if (request.intent.slots.PN.value) {
+            //stop conference on the phone number that was provided
+            //stopConference(phone_number)
         //If a device was not provided
+        } else if (request.intent.slots.BeAnywhere.value) {
+            //stop conference on the BeAnywhere device that was provided
+            //stopConference(be_anywhere)
         } else {
-            //stop conference on the device that was in the previous session
-            //stopConference(session_device)
+            //stop conference on the device that the conference was started on
+            //stopConference(start_device)
         }
 
         options.speechText = "Your conference was stopped.";
-        options.endSession = true;
-        context.succeed(buildResponse(options));
 
     } else {
         options.speechText = "Incorrect usage.To stop a conference, a conference must first be started.";
-		options.endSession = true;
-		context.succeed(buildResponse(options));
     }
+
+    options.endSession = true;
+
+    //Resetting global variables
+    startIntent = false;
+    PN_GLOBAL = "";
+    BeAnywhere_GLOBAL = "";
+
+    context.succeed(buildResponse(options));
+
 }
 
 function addSpacing(text) {

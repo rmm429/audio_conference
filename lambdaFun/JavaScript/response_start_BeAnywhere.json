@@ -6,11 +6,7 @@
 				"type": "SSML",
 				"ssml": "<speak>Your conference was started on my cell. </speak>"
 			},
-			"shouldEndSession": false
-		},
-		"sessionAttributes": {
-			"startIntent": true,
-			"BeAnywhere": "my cell"
+			"shouldEndSession": true
 		}
 	}
 }
