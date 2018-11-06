@@ -26,6 +26,7 @@ exports.handler = function(event,context) {
 
 		} else if (request.type === "IntentRequest") {
 
+            /*
             if (request.intent.name === "PNIntent") {
 
                 handleStartPNIntent(request,context,session);
@@ -33,6 +34,14 @@ exports.handler = function(event,context) {
             } else if (request.intent.name === "BeAnywhereIntent") {
 
                 handleStartBeAnywhereIntent(request,context,session);
+
+            }
+            */
+
+            if (request.intent.name === "StartIntent")
+            {
+
+                handleStartIntent(request,context,session);
 
             } else if (request.intent.name === "StopIntent") {
                 
@@ -125,36 +134,32 @@ function handleLaunchRequest(context) {
     context.succeed(buildResponse(options));
 }
 
-function handleStartPNIntent(request,context,session) {
+function handleStartIntent(request,context,session) {
     let options = {};
-    let PN = request.intent.slots.PN.value;
-    //Remembering the current session
-    options.session = session;
-    options.speechText = `Your conference was started on <say-as interpret-as="telephone">${PN}</say-as>.`;
-    //Noting that we are coming from a start intent
-    options.session.attributes.startIntent = true;
-    options.session.attributes.PN = PN;
-    options.endSession = false;
-    context.succeed(buildResponse(options));
-}
 
-function handleStartBeAnywhereIntent(request,context,session) {
-    let options = {};
-    let BeAnywhere = request.intent.slots.BeAnywhere.value;
     //Remembering the current session
     options.session = session;
-    options.speechText = `Your conference was started on ${BeAnywhere}.`;
-    //Noting that we are coming from a start intent
+
+    //Noting that we are coming from the intent StartIntent
     options.session.attributes.startIntent = true;
-    options.session.attributes.BeAnywhere = BeAnywhere;
+
+    //Checking to see which type of request is being made
+    if (request.intent.slots.PN.value) {
+        let PN = request.intent.slots.PN.value;
+        options.speechText = `Your conference was started on <say-as interpret-as="telephone">${PN}</say-as>.`;
+        options.session.attributes.PN = PN;
+    } else if (request.intent.slots.BeAnywhere.value) {
+        let BeAnywhere = request.intent.slots.BeAnywhere.value;
+        options.speechText = `Your conference was started on ${BeAnywhere}.`;
+        options.session.attributes.BeAnywhere = BeAnywhere;
+    }
+
     options.endSession = false;
     context.succeed(buildResponse(options));
 }
 
 function handleStopIntent(request,context,session) {
     let options = {};
-    //Remembering the current session
-    options.session = session;
 
     //Making sure we came from a start intent
     if(session.attributes.startIntent)
