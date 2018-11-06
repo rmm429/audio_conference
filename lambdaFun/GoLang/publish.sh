@@ -1,3 +1,5 @@
-\rm -rf lambda_upload.zip
-zip -r lambda_upload.zip main.go
-aws lambda update-function-code --function-name AudioConferenceSkill --zip-file fileb://lambda_upload.zip
+\rm -rf main
+\rm -rf handler.zip
+GOOS=linux go build -o main
+zip handler.zip ./main
+aws lambda update-function-code --function-name AudioConferenceSkill --zip-file fileb://handler.zip

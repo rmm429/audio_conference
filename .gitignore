@@ -1,2 +1,3 @@
 *.DS_Store
-lambdaFun/JavaScript/*.zip
+*.zip
+lambdaFun/GoLang/main
