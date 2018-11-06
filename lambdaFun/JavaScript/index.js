@@ -28,11 +28,15 @@ exports.handler = function(event,context) {
 
             if (request.intent.name === "PNIntent") {
 
-                handlePNIntent(request,context);
+                handleStartPNIntent(request,context);
 
             } else if (request.intent.name === "BeAnywhereIntent") {
 
-                handleBeAnywhereIntent(request,context);
+                handleStartBeAnywhereIntent(request,context);
+
+            } else if (request.intent.name === "StopIntent") {
+                
+                handleStopIntent(request,context);
 
             } else {
                 throw("Unknown intent");
@@ -121,7 +125,7 @@ function handleLaunchRequest(context) {
     context.succeed(buildResponse(options));
 }
 
-function handlePNIntent(request,context) {
+function handleStartPNIntent(request,context) {
     let options = {};
     let PN = request.intent.slots.PN.value;
     options.speechText = `Your conference was started on <say-as interpret-as="telephone">${PN}</say-as>.`;
@@ -129,10 +133,17 @@ function handlePNIntent(request,context) {
     context.succeed(buildResponse(options));
 }
 
-function handleBeAnywhereIntent(request,context) {
+function handleStartBeAnywhereIntent(request,context) {
     let options = {};
     let BeAnywhere = request.intent.slots.BeAnywhere.value;
     options.speechText = `Your conference was started on ${BeAnywhere}.`;
+    options.endSession = true;
+    context.succeed(buildResponse(options));
+}
+
+function handleStopIntent(request,context) {
+    let options = {};
+    options.speechText = "Your conference was stopped.";
     options.endSession = true;
     context.succeed(buildResponse(options));
 }

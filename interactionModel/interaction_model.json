@@ -46,6 +46,23 @@
                     "samples": [
                         "start a conference on {BeAnywhere}"
                     ]
+                },
+                {
+                    "name": "StopIntent",
+                    "slots": [
+                        {
+                            "name": "PN",
+                            "type": "AMAZON.PhoneNumber"
+                        },
+                        {
+                            "name": "BeAnywhere",
+                            "type": "BeAnywhere"
+                        }
+                    ],
+                    "samples": [
+                        "stop the conference on {BeAnywhere}",
+                        "stop the conference on {PN}"
+                    ]
                 }
             ],
             "types": [

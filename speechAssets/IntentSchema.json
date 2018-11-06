@@ -17,6 +17,19 @@
               "type": "BeAnywhere"
           }
       ]
+    },
+    {
+      "intent": "StopIntent",
+      "slots": [
+          {
+              "name": "PN",
+              "type": "AMAZON.PhoneNumber"
+          },
+          {
+              "name": "BeAnywhere",
+              "type": "BeAnywhere"
+          }
+      ]
     }
   ]
 }
