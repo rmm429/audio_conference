@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "audio conference javascript",
+            "invocationName": "audio conference",
             "intents": [
                 {
                     "name": "AMAZON.FallbackIntent",
