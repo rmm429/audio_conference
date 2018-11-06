@@ -112,7 +112,16 @@ function buildResponse(options) {
 function handleLaunchRequest(context) {
     let options = {};
     options.speechText = "Welcome to the Audio Conference skill.Using this skill, you can start an audio conference on a telephone number or a Be Anywhere device.You can say, for example, ask audio conference to start a conference on <say-as interpret-as=\"telephone\">2155551234</say-as>, or, ask audio conference to start a conference on My Cell.";
+    options.cardContent = "Welcome to the Audio Conference skill.  Using this skill, you can start an audio conference on a telephone number or a Be Anywhere device.  You can say, for example, ask audio conference to start a conference on 2155551234, or, ask audio conference to start a conference on My Cell.";
+    options.cardTitle = "Audio Conference";
+    options.imageUrl = "https://cdn.pixabay.com/photo/2017/09/28/22/14/speech-icon-2797263_960_720.png";
     options.endSession = true;
+
+    //Outputting the Launch JSON to the console
+    if(process.env.NODE_DEBUG_EN) {
+		console.log("\nLaunch:\n" + JSON.stringify(options,null,2));
+    }
+
     context.succeed(buildResponse(options));
 }
 
@@ -129,20 +138,32 @@ function handleStartIntent(request,context,session) {
         if (request.intent.slots.PN.value) {
             let PN = request.intent.slots.PN.value;
             options.speechText = `Your conference was started on <say-as interpret-as="telephone">${PN}</say-as>.`;
+            options.cardContent = `Your conference was started on ${PN}.`;
             PN_GLOBAL = PN;
         } else if (request.intent.slots.BeAnywhere.value) {
             let BeAnywhere = request.intent.slots.BeAnywhere.value;
             options.speechText = `Your conference was started on ${BeAnywhere}.`;
+            options.cardContent = `Your conference was started on ${BeAnywhere}.`;
             BeAnywhere_GLOBAL = BeAnywhere;
         }
 
-        //options.endSession = false;
-        options.endSession = true;
+        options.imageUrl = "https://www.pngimg.com/uploads/phone/phone_PNG49047.png";
 
     } else {
 
         options.speechText = "Incorrect usage.To start a conference, please provide a telephone number or a Be Anywhere device.";
+        options.cardContent = "Incorrect usage.  To start a conference, please provide a telephone number or a Be Anywhere device.";
+        options.imageUrl = "https://cdn.pixabay.com/photo/2012/04/12/22/25/warning-sign-30915_1280.png";
 
+    }
+
+    options.cardTitle = "Audio Conference Start";
+
+    options.endSession = true;
+
+    //Outputting the StartIntent JSON to the console
+    if(process.env.NODE_DEBUG_EN) {
+		console.log("\nStartIntent:\n" + JSON.stringify(options,null,2));
     }
 
     context.succeed(buildResponse(options));
@@ -158,27 +179,41 @@ function handleStopIntent(request,context,session) {
         if (request.intent.slots.PN.value) {
             //stop conference on the phone number that was provided
             //stopConference(phone_number)
-            options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${request.intent.slots.PN.value}</say-as>.`
+            options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${request.intent.slots.PN.value}</say-as>.`;
+            options.cardContent = `Your conference was stopped on ${request.intent.slots.PN.value}.`;
+            options.imageUrl = "https://www.pngimg.com/uploads/phone/phone_PNG48981.png";
         //If a device was not provided
         } else if (request.intent.slots.BeAnywhere.value) {
             //stop conference on the BeAnywhere device that was provided
             //stopConference(be_anywhere)
-            options.speechText = `Your conference was stopped on ${request.intent.slots.BeAnywhere.value}.`
+            options.speechText = `Your conference was stopped on ${request.intent.slots.BeAnywhere.value}.`;
+            options.cardContent = `Your conference was stopped on ${request.intent.slots.BeAnywhere.value}.`;
+            options.imageUrl = "https://www.pngimg.com/uploads/phone/phone_PNG48981.png";
         } else if (PN_GLOBAL != "") {
             //stop conference on the phone number that the conference was started on
             //stopConference(phone_number)
-            options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${PN_GLOBAL}</say-as>.`
+            options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${PN_GLOBAL}</say-as>.`;
+            options.cardContent = `Your conference was stopped on ${PN_GLOBAL}.`;
+            options.imageUrl = "https://www.pngimg.com/uploads/phone/phone_PNG48981.png";
         } else if (BeAnywhere_GLOBAL != "") {
             //stop conference on the BeAnywhere device that the conference was started on
             //stopConference(be_anywhere)
-            options.speechText = `Your conference was stopped on ${BeAnywhere_GLOBAL}.`
+            options.speechText = `Your conference was stopped on ${BeAnywhere_GLOBAL}.`;
+            options.cardContent = `Your conference was stopped on ${BeAnywhere_GLOBAL}.`;
+            options.imageUrl = "https://www.pngimg.com/uploads/phone/phone_PNG48981.png";
         } else {
             options.speechText = "Invalid option.To stop the conference, please provide a valid telephone number or BeAnywhere device.";
+            options.cardContent = "Invalid option.  To stop the conference, please provide a valid telephone number or BeAnywhere device.";
+            options.imageUrl = "https://cdn.pixabay.com/photo/2012/04/12/22/25/warning-sign-30915_1280.png"
         }
 
     } else {
         options.speechText = "Incorrect usage.To stop a conference, a conference must first be started.";
+        options.cardContent = "Incorrect usage.  To stop a conference, a conference must first be started.";
+        options.imageUrl = "https://cdn.pixabay.com/photo/2012/04/12/22/25/warning-sign-30915_1280.png"
     }
+
+    options.cardTitle = "Audio Conference Stop";
 
     options.endSession = true;
 
@@ -186,6 +221,11 @@ function handleStopIntent(request,context,session) {
     startIntent = false;
     PN_GLOBAL = "";
     BeAnywhere_GLOBAL = "";
+
+    //Outputting the StopIntent JSON to the console
+    if(process.env.NODE_DEBUG_EN) {
+		console.log("\nStopIntent:\n" + JSON.stringify(options,null,2));
+    }
 
     context.succeed(buildResponse(options));
 
