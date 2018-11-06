@@ -1,1 +1,0 @@
-env NODE_DEBUG_EN=1 lambda-local -l index.js -h handler -e event.json
