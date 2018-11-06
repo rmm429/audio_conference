@@ -22,9 +22,44 @@
                 {
                     "name": "AMAZON.NavigateHomeIntent",
                     "samples": []
+                },
+                {
+                    "name": "PNIntent",
+                    "slots": [
+                        {
+                            "name": "PN",
+                            "type": "AMAZON.PhoneNumber"
+                        }
+                    ],
+                    "samples": [
+                        "start a conference on {PN}"
+                    ]
+                },
+                {
+                    "name": "BeAnywhereIntent",
+                    "slots": [
+                        {
+                            "name": "BeAnywhere",
+                            "type": "BeAnywhere"
+                        }
+                    ],
+                    "samples": [
+                        "start a conference on {BeAnywhere}"
+                    ]
                 }
             ],
-            "types": []
+            "types": [
+                {
+                    "name": "BeAnywhere",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "my cell"
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     }
 }

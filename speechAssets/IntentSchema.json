@@ -1,0 +1,22 @@
+{
+  "intents": [
+    {
+      "intent": "PNIntent",
+      "slots": [
+          {
+              "name": "PN",
+              "type": "AMAZON.PhoneNumber"
+          }
+      ]
+    },
+    {
+      "intent": "BeAnywhereIntent",
+      "slots": [
+          {
+              "name": "BeAnywhere",
+              "type": "BeAnywhere"
+          }
+      ]
+    }
+  ]
+}
