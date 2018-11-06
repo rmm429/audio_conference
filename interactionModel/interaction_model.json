@@ -65,6 +65,11 @@
                     "values": [
                         {
                             "name": {
+                                "value": "mobile"
+                            }
+                        },
+                        {
+                            "name": {
                                 "value": "my cell"
                             }
                         }
