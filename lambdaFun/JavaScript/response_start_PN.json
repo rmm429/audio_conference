@@ -1,0 +1,12 @@
+{
+	"body": {
+		"version": "1.0",
+		"response": {
+			"outputSpeech": {
+				"type": "SSML",
+				"ssml": "<speak>Your conference was started on <say-as interpret-as=\"telephone\">7246832913</say-as>. </speak>"
+			},
+			"shouldEndSession": true
+		}
+	}
+}

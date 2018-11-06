@@ -1,0 +1,12 @@
+{
+	"body": {
+		"version": "1.0",
+		"response": {
+			"outputSpeech": {
+				"type": "SSML",
+				"ssml": "<speak>Your conference was started on my cell. </speak>"
+			},
+			"shouldEndSession": true
+		}
+	}
+}
