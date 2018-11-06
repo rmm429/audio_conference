@@ -1,0 +1,11 @@
+{
+	"body": {
+		"version": "1.0",
+		"response": {
+			"outputSpeech": {
+				"type": "SSML",
+				"ssml": "<speak>Incorrect usage.  To start a conference, please provide a telephone number or a Be Anywhere device. </speak>"
+			}
+		}
+	}
+}

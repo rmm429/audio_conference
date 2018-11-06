@@ -1,0 +1,12 @@
+{
+	"body": {
+		"version": "1.0",
+		"response": {
+			"outputSpeech": {
+				"type": "SSML",
+				"ssml": "<speak>Incorrect usage.  To stop a conference, a conference must first be started. </speak>"
+			},
+			"shouldEndSession": true
+		}
+	}
+}
