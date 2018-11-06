@@ -158,16 +158,23 @@ function handleStopIntent(request,context,session) {
         if (request.intent.slots.PN.value) {
             //stop conference on the phone number that was provided
             //stopConference(phone_number)
+            options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${request.intent.slots.PN.value}</say-as>.`
         //If a device was not provided
         } else if (request.intent.slots.BeAnywhere.value) {
             //stop conference on the BeAnywhere device that was provided
             //stopConference(be_anywhere)
+            options.speechText = `Your conference was stopped on ${request.intent.slots.BeAnywhere.value}.`
+        } else if (PN_GLOBAL != "") {
+            //stop conference on the phone number that the conference was started on
+            //stopConference(phone_number)
+            options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${PN_GLOBAL}</say-as>.`
+        } else if (BeAnywhere_GLOBAL != "") {
+            //stop conference on the BeAnywhere device that the conference was started on
+            //stopConference(be_anywhere)
+            options.speechText = `Your conference was stopped on ${BeAnywhere_GLOBAL}.`
         } else {
-            //stop conference on the device that the conference was started on
-            //stopConference(start_device)
+            options.speechText = "Invalid option.To stop the conference, please provide a valid telephone number or BeAnywhere device.";
         }
-
-        options.speechText = "Your conference was stopped.";
 
     } else {
         options.speechText = "Incorrect usage.To stop a conference, a conference must first be started.";
