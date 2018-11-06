@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "audio conference javascript",
+            "invocationName": "audio conference",
             "intents": [
                 {
                     "name": "AMAZON.FallbackIntent",
@@ -24,6 +24,23 @@
                     "samples": []
                 },
                 {
+                    "name": "StartIntent",
+                    "slots": [
+                        {
+                            "name": "PN",
+                            "type": "AMAZON.PhoneNumber"
+                        },
+                        {
+                            "name": "BeAnywhere",
+                            "type": "BeAnywhere"
+                        }
+                    ],
+                    "samples": [
+                        "start a conference on {BeAnywhere}",
+                        "start a conference on {PN}"
+                    ]
+                },
+                {
                     "name": "StopIntent",
                     "slots": [
                         {
@@ -39,23 +56,6 @@
                         "stop the conference",
                         "stop the conference on {BeAnywhere}",
                         "stop the conference on {PN}"
-                    ]
-                },
-                {
-                    "name": "StartIntent",
-                    "slots": [
-                        {
-                            "name": "PN",
-                            "type": "AMAZON.PhoneNumber"
-                        },
-                        {
-                            "name": "BeAnywhere",
-                            "type": "BeAnywhere"
-                        }
-                    ],
-                    "samples": [
-                        "start a conference on {BeAnywhere}",
-                        "start a conference on {PN}"
                     ]
                 }
             ],
