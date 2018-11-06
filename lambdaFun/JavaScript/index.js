@@ -1,8 +1,6 @@
 'use strict';
 
-var startIntent = false;
-var PN_GLOBAL = "";
-var BeAnywhere_GLOBAL = "";
+var userInfo = {};
 
 //<a href="https://www.iconfinder.com/icons/309047/conference_group_people_users_icon" target="_blank">"Conference, group, people, users icon"</a> by <a href="https://www.iconfinder.com/visualpharm" target="_blank">Ivan Boyko</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>
 //"Conference, group, people, users icon" (https://www.iconfinder.com/icons/309047/conference_group_people_users_icon) by Ivan Boyko (https://www.iconfinder.com/visualpharm) is licensed under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0)
@@ -32,6 +30,13 @@ var phoneErrorImg = {
     large: "https://s3.amazonaws.com/audio-conference/images/phoneErrorLarge.png"
 };
 
+//<a href="https://www.iconfinder.com/icons/183285/help_mark_question_icon" target="_blank">"Help, mark, question icon"</a> by <a href="https://www.iconfinder.com/yanlu" target="_blank">Yannick Lung</a>
+//"Help, mark, question icon" (https://www.iconfinder.com/icons/183285/help_mark_question_icon) by Yannick Lung (https://www.iconfinder.com/yanlu)
+var questionImg = {
+    small: "https://s3.amazonaws.com/audio-conference/images/questionSmall.png",
+    large: "https://s3.amazonaws.com/audio-conference/images/questionLarge.png"
+};
+
 //event = input JSON
 exports.handler = function(event,context) {
 
@@ -43,8 +48,25 @@ exports.handler = function(event,context) {
         }
         
         //specific objects of the event JSON
-		var request = event.request;
-        var session = event.session;
+        var request = event.request;
+
+        //Retrieving the Amazon ID of the current user of the skill
+        var amazonId = event.context.System.user.userId;
+
+        //Checking to see if previous data does not exists for the current user of the skill
+        if(!(userInfo.hasOwnProperty(amazonId.valueOf()))) {
+
+            //Creating an info JSON to store specific intent information
+            var info = {
+                startIntent: false,
+                PN: "",
+                BeAnywhere: ""
+            };
+
+            //Associating specific intent information to the current user of the skill
+            userInfo[amazonId.valueOf()] = info;
+
+        }
         
         if (request.type === "LaunchRequest") {
 
@@ -52,14 +74,13 @@ exports.handler = function(event,context) {
 
 		} else if (request.type === "IntentRequest") {
 
-            if (request.intent.name === "StartIntent")
-            {
+            if (request.intent.name === "StartIntent"){
 
-                handleStartIntent(request,context,session);
+                handleStartIntent(request,context,amazonId);
 
             } else if (request.intent.name === "StopIntent") {
                 
-                handleStopIntent(request,context,session);
+                handleStopIntent(request,context,amazonId);
 
             } else {
                 throw("Unknown intent");
@@ -152,6 +173,11 @@ function handleLaunchRequest(context) {
     options.imageObj = conferenceImg;
     options.endSession = true;
 
+    //Outputting the userInfo JSON to the console
+    if(process.env.USERINFO_DEBUG_EN) {
+		console.log("\nuserInfo (LaunchRequest):\n" + JSON.stringify(userInfo,null,2));
+    }
+
     //Outputting the Launch JSON to the console
     if(process.env.NODE_DEBUG_EN) {
 		console.log("\nLaunch:\n" + JSON.stringify(options,null,2));
@@ -160,41 +186,78 @@ function handleLaunchRequest(context) {
     context.succeed(buildResponse(options));
 }
 
-function handleStartIntent(request,context,session) {
+function handleStartIntent(request,context,amazonId) {
     let options = {};
 
-    //Checking to see if slots exist
-    if (request.intent.slots.PN.value || request.intent.slots.BeAnywhere.value)
-    {
-        //Noting that we are coming from the intent StartIntent
-        startIntent = true;
+    //The info JSON that will store specific intent information
+    var info = {};
 
-        //Checking to see which type of request is being made
-        if (request.intent.slots.PN.value) {
-            let PN = request.intent.slots.PN.value;
-            options.speechText = `Your conference was started on <say-as interpret-as="telephone">${PN}</say-as>.`;
-            options.cardContent = `Your conference was started on ${PN}.`;
-            PN_GLOBAL = PN;
-        } else if (request.intent.slots.BeAnywhere.value) {
-            let BeAnywhere = request.intent.slots.BeAnywhere.value;
-            options.speechText = `Your conference was started on ${BeAnywhere}.`;
-            options.cardContent = `Your conference was started on ${BeAnywhere}.`;
-            BeAnywhere_GLOBAL = BeAnywhere;
+    //Checking to see if previous data exists for the current user of the skill
+    if(userInfo.hasOwnProperty(amazonId.valueOf())) {
+
+        //Retrieving the info JSON mapped to the Amazon ID of the user of the skill
+        info = userInfo[amazonId.valueOf()];
+
+        //Checking to see if slots exist
+        if (request.intent.slots.PN.value || request.intent.slots.BeAnywhere.value)
+        {
+            //Noting that we are coming from the intent StartIntent
+            info.startIntent = true;
+
+            //Checking to see which type of request is being made
+            if (request.intent.slots.PN.value) {
+                let PN = request.intent.slots.PN.value;
+                options.speechText = `Your conference was started on <say-as interpret-as="telephone">${PN}</say-as>.`;
+                options.cardContent = `Your conference was started on ${PN}.`;
+                //Saving the phone number in the info JSON
+                info.PN = PN;
+            } else if (request.intent.slots.BeAnywhere.value) {
+                let BeAnywhere = request.intent.slots.BeAnywhere.value;
+                options.speechText = `Your conference was started on ${BeAnywhere}.`;
+                options.cardContent = `Your conference was started on ${BeAnywhere}.`;
+                //Saving the Be Anywhere device in the info JSON
+                info.BeAnywhere = BeAnywhere;
+            }
+
+            options.endSession = true;
+            options.imageObj = phoneStartImg;
+
+        } else {
+
+            options.speechText = "What device would you like to start your conference on?";
+            options.repromptText = "You can say a telephone number, such as <say-as interpret-as=\"telephone\">2155551234</say-as>, or say a Be Anywhere device, such as My Cell.";
+            options.cardContent = "You can say a telephone number, such as 2155551234, or say a Be Anywhere device, such as My Cell."
+            options.imageObj = questionImg;
+            options.endSession = false;
+
         }
 
-        options.imageObj = phoneStartImg;
-        
         options.cardTitle = "Audio Conference Start";
 
+    //If no previous data exists for the current user, throw an error and refresh the data
     } else {
 
-        options.speechText = "Incorrect usage.To start a conference, please provide a telephone number or a Be Anywhere device.";
-        options.cardContent = "Incorrect usage.  To start a conference, please provide a telephone number or a Be Anywhere device.";
+        options.speechText = "Unknown usage error.The data associated with your Amazon ID for this skill was not able to be retrieved.Your data has been refreshed.Please start over and try again!";
+        options.cardContent = "Unknown usage error.  The data associated with your Amazon ID for this skill was not able to be retrieved.  Your data has been refreshed.  Please start over and try again!";
         options.imageObj = phoneErrorImg;
         options.cardTitle = "ERROR: Audio Conference Start";
+
+        //Creating an info JSON to store specific intent information
+        info = {
+            startIntent: false,
+            PN: "",
+            BeAnywhere: ""
+        };
+
     }
 
-    options.endSession = true;
+    //Adding the info JSON to the userInfo JSON with the key set as the Amazon ID of the current user of the skill
+    userInfo[amazonId.valueOf()] = info;
+
+    //Outputting the userInfo JSON to the console
+    if(process.env.USERINFO_DEBUG_EN) {
+		console.log("\nuserInfo (StartIntent):\n" + JSON.stringify(userInfo,null,2));
+    }
 
     //Outputting the StartIntent JSON to the console
     if(process.env.NODE_DEBUG_EN) {
@@ -204,62 +267,96 @@ function handleStartIntent(request,context,session) {
     context.succeed(buildResponse(options));
 }
 
-function handleStopIntent(request,context,session) {
+function handleStopIntent(request,context,amazonId) {
     let options = {};
 
-    //Making sure we came from a the intent StartIntent
-    if(startIntent)
-    {
-        //If a device was provided
-        if (request.intent.slots.PN.value) {
-            //stop conference on the phone number that was provided
-            //stopConference(phone_number)
-            options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${request.intent.slots.PN.value}</say-as>.`;
-            options.cardContent = `Your conference was stopped on ${request.intent.slots.PN.value}.`;
-            options.imageObj = phoneStopImg;
-            options.cardTitle = "Audio Conference Stop";
-        //If a device was not provided
-        } else if (request.intent.slots.BeAnywhere.value) {
-            //stop conference on the BeAnywhere device that was provided
-            //stopConference(be_anywhere)
-            options.speechText = `Your conference was stopped on ${request.intent.slots.BeAnywhere.value}.`;
-            options.cardContent = `Your conference was stopped on ${request.intent.slots.BeAnywhere.value}.`;
-            options.imageObj = phoneStopImg;
-            options.cardTitle = "Audio Conference Stop";
-        } else if (PN_GLOBAL != "") {
-            //stop conference on the phone number that the conference was started on
-            //stopConference(phone_number)
-            options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${PN_GLOBAL}</say-as>.`;
-            options.cardContent = `Your conference was stopped on ${PN_GLOBAL}.`;
-            options.imageObj = phoneStopImg;
-            options.cardTitle = "Audio Conference Stop";
-        } else if (BeAnywhere_GLOBAL != "") {
-            //stop conference on the BeAnywhere device that the conference was started on
-            //stopConference(be_anywhere)
-            options.speechText = `Your conference was stopped on ${BeAnywhere_GLOBAL}.`;
-            options.cardContent = `Your conference was stopped on ${BeAnywhere_GLOBAL}.`;
-            options.imageObj = phoneStopImg;
-            options.cardTitle = "Audio Conference Stop";
+    //The info JSON that will store specific intent information
+    var info = {};
+
+    //Checking to see if previous data exists for the current user of the skill
+    if(userInfo.hasOwnProperty(amazonId.valueOf())) {
+
+        //Retrieving the info JSON mapped to the Amazon ID of the user of the skill
+        info = userInfo[amazonId.valueOf()];
+
+        //Making sure we came from a the intent StartIntent
+        if(info.startIntent) {
+            //If a phone number was provided
+            if (request.intent.slots.PN.value) {
+                //stop conference on the phone number that was provided
+                //stopConference(phone_number)
+                options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${request.intent.slots.PN.value}</say-as>.`;
+                options.cardContent = `Your conference was stopped on ${request.intent.slots.PN.value}.`;
+                options.imageObj = phoneStopImg;
+                options.cardTitle = "Audio Conference Stop";
+            //If a Be Anywhere device was provided
+            } else if (request.intent.slots.BeAnywhere.value) {
+                //stop conference on the BeAnywhere device that was provided
+                //stopConference(be_anywhere)
+                options.speechText = `Your conference was stopped on ${request.intent.slots.BeAnywhere.value}.`;
+                options.cardContent = `Your conference was stopped on ${request.intent.slots.BeAnywhere.value}.`;
+                options.imageObj = phoneStopImg;
+                options.cardTitle = "Audio Conference Stop";
+            //If a phone number was used to start the conference
+            } else if (info.PN != "") {
+                //stop conference on the phone number that the conference was started on
+                //stopConference(phone_number)
+                options.speechText = `Your conference was stopped on <say-as interpret-as="telephone">${info.PN}</say-as>.`;
+                options.cardContent = `Your conference was stopped on ${info.PN}.`;
+                options.imageObj = phoneStopImg;
+                options.cardTitle = "Audio Conference Stop";
+
+            //If a Be Anywhere device was used to start the conference
+            } else if (info.BeAnywhere != "") {
+                //stop conference on the BeAnywhere device that the conference was started on
+                //stopConference(be_anywhere)
+                options.speechText = `Your conference was stopped on ${info.BeAnywhere}.`;
+                options.cardContent = `Your conference was stopped on ${info.BeAnywhere}.`;
+                options.imageObj = phoneStopImg;
+                options.cardTitle = "Audio Conference Stop";
+
+            //No cases were fulfilled, throw error
+            } else {
+                options.speechText = "Invalid option.To stop the conference, please provide a valid telephone number or BeAnywhere device.";
+                options.cardContent = "Invalid option.  To stop the conference, please provide a valid telephone number or BeAnywhere device.";
+                options.imageObj = phoneErrorImg;
+                options.cardTitle = "ERROR: Audio Conference Stop";
+            }
+
+        //If we did not come from the intent StartIntent
         } else {
-            options.speechText = "Invalid option.To stop the conference, please provide a valid telephone number or BeAnywhere device.";
-            options.cardContent = "Invalid option.  To stop the conference, please provide a valid telephone number or BeAnywhere device.";
+            options.speechText = "Incorrect usage.To stop a conference, a conference must first be started.";
+            options.cardContent = "Incorrect usage.  To stop a conference, a conference must first be started.";
             options.imageObj = phoneErrorImg;
             options.cardTitle = "ERROR: Audio Conference Stop";
         }
 
+    //If no previous data exists for the current user, throw an error and refresh the data
     } else {
-        options.speechText = "Incorrect usage.To stop a conference, a conference must first be started.";
-        options.cardContent = "Incorrect usage.  To stop a conference, a conference must first be started.";
+
+        options.speechText = "Unknown usage error.The data associated with your Amazon ID for this skill was not able to be retrieved.Your data has been refreshed.Please start over and try again!";
+        options.cardContent = "Unknown usage error.  The data associated with your Amazon ID for this skill was not able to be retrieved.  Your data has been refreshed.  Please start over and try again!";
         options.imageObj = phoneErrorImg;
         options.cardTitle = "ERROR: Audio Conference Stop";
+
     }
 
     options.endSession = true;
 
-    //Resetting global variables
-    startIntent = false;
-    PN_GLOBAL = "";
-    BeAnywhere_GLOBAL = "";
+    //Emptying the info JSON for new usage of the skill
+    info = {
+        startIntent: false,
+        PN: "",
+        BeAnywhere: ""
+    };
+
+    //Adding the info JSON to the userInfo JSON with the key set as the Amazon ID of the current user of the skill
+    userInfo[amazonId.valueOf()] = info;
+
+    //Outputting the userInfo JSON to the console
+    if(process.env.USERINFO_DEBUG_EN) {
+		console.log("\nuserInfo (StopIntent):\n" + JSON.stringify(userInfo,null,2));
+    }
 
     //Outputting the StopIntent JSON to the console
     if(process.env.NODE_DEBUG_EN) {
