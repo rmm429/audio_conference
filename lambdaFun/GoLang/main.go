@@ -36,7 +36,7 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 			builder.Say("Your conference was started on " + BeAnywhereCur + ". ")
 		}
 
-		return alexa.NewSSMLResponse("StartIntent NoDevices", builder.Build(), "", true)
+		return alexa.NewSSMLResponse("StartIntent Device", builder.Build(), "", true)
 
 	} else {
 
@@ -54,28 +54,68 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 }
 
-func IntentDispatcher(request alexa.Request) alexa.Response {
-
-	var response alexa.Response
-	switch request.Body.Intent.Name {
-	case "StartIntent":
-		response = HandleStartIntent(request)
-	//case "StopIntent":
-	//response = HandleStopIntent(request)
-	default:
-		response = HandleStartIntent(request)
-	}
-	return response
-
-}
-
-/*
 func HandleStopIntent(request alexa.Request) alexa.Response {
 
 	var builder alexa.SSMLBuilder
 
+	slots := request.Body.Intent.Slots
+	PNCur := slots["PN"].Value
+	BeAnywhereCur := slots["BeAnywhere"].Value
+
+	if PNCur != "" {
+
+		builder.Say("Your conference was stopped on ")
+		builder.PN(PNCur)
+		builder.Say(". ")
+
+	} else if BeAnywhereCur != "" {
+
+		builder.Say("Your conference was stopped on " + BeAnywhereCur + ". ")
+
+	} else {
+
+		builder.Say("Your conference was stopped. ")
+
+	}
+
+	return alexa.NewSSMLResponse("StopIntent", builder.Build(), "", true)
+
 }
-*/
+
+func HandleLaunchRequest(request alexa.Request) alexa.Response {
+
+	var builder alexa.SSMLBuilder
+
+	builder.Say("Welcome to the Audio Conference skill.  ")
+	builder.Say("Using this skill, you can start an audio conference on a telephone number or a Be Anywhere device.  ")
+	builder.Say("You can say, for example, ask audio conference to start a conference on ")
+	builder.PN("2155551234")
+	builder.Say(", or, ask audio conference to start a conference on My Cell. ")
+
+	return alexa.NewSSMLResponse("LaunchRequest", builder.Build(), "", true)
+
+}
+
+func IntentDispatcher(request alexa.Request) alexa.Response {
+
+	var response alexa.Response
+
+	if request.Body.Type == "LaunchRequest" {
+		response = HandleLaunchRequest(request)
+	} else if request.Body.Type == "IntentRequest" {
+
+		switch request.Body.Intent.Name {
+		case "StartIntent":
+			response = HandleStartIntent(request)
+		case "StopIntent":
+			response = HandleStopIntent(request)
+		}
+
+	}
+
+	return response
+
+}
 
 /*
 package main

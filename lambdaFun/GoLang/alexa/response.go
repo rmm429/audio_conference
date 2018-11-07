@@ -106,7 +106,7 @@ func NewSSMLResponse(title string, text string, reprompt string, endSession bool
 				Reprompt: &Reprompt{
 					OutputSpeech: Payload{
 						Type: "SSML",
-						SSML: text,
+						SSML: reprompt,
 					},
 				},
 				ShouldEndSession: endSession,
