@@ -1,0 +1,36 @@
+userInfo documentation
+
++ userInfo: dictionary
+	+ key: amazonId (string) --event.context.System.user.userId
+	+ value: info (JSON)
+		+ startIntent: boolean
+		+ PN: string
+		+ BeAnywhere: string
+
+- userInfo: dictionary containing Amazon ID as key and intent info JSON as value
+	- key: Amazon user ID taken from event.context.System.user.userID
+	- value: intent info JSON
+		- startIntent: ensures that we came from the intent StartIntent
+		- PN: the phone number that was provided to start the conference
+		- BeAnywhere: the Be Anywhere deivce that was provided to start the conference
+
+• userInfo is a global dictionary
+• First, the userInfo dictionary is evaluated to see if an info JSON already exists for the current Amazon user
+	• If the info JSON does not exist, it is created before any intents and/or requests are invoked
+		• startIntent = false
+		• PN = ""
+		• BeAnywhere = ""
+• When the intent StartIntent is invoked:
+	• The boolean startIntent will be set to true
+	• The phone number or Be Anywhere deivce name will be saved in its appropriate string
+		• If one string is not empty, then the other string will be empty (always true)
+			• e.g. if a phone number is provided, then a Be Anywhere device was not provided
+• If the intent StopIntent is invoked without the intent StartIntent having been invoked beforehand, the boolean startIntent in the info JSON will be false
+	• Since the intent StartIntent was never invoked, the value of the boolean startIntent was never set to true
+	• If the boolean startIntent is false, the main funcitonality of the intent StartIntent will not be executed (error handled, message through Alexa)
+• When the intent StopIntent is completed, the variables in info JSON are set to the default values
+	• startIntent = false
+	• PN = ""
+	• BeAnywhere = ""
+• Careful checking: within each intent, a check is done to see if the info JSON exists for the current Amazon user before executing the main functionality
+	• Even though the info JSON is created before any intents and/or requests are invoked if it does not already exist for the current Amazon user

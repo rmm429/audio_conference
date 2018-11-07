@@ -1,7 +1,9 @@
 package main
 
 import (
-	"testGoLang/alexa"
+	//"strings"
+
+	"audio_conference/lambdaFun/GoLang/alexa"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -15,23 +17,65 @@ func main() {
 }
 
 func HandleStartIntent(request alexa.Request) alexa.Response {
-	//slots := request.Body.Intent.Slots
+
 	var builder alexa.SSMLBuilder
-	builder.Say("Here are the current frontpage deals:")
-	builder.Pause("1000")
-	return alexa.NewSSMLResponse("Frontpage Deals", builder.Build())
+
+	slots := request.Body.Intent.Slots
+	PNCur := slots["PN"].Value
+	BeAnywhereCur := slots["BeAnywhere"].Value
+
+	if PNCur != "" || BeAnywhereCur != "" {
+
+		if PNCur != "" {
+
+			builder.Say("Your conference was started on ")
+			builder.PN(PNCur)
+			builder.Say(". ")
+
+		} else if BeAnywhereCur != "" {
+			builder.Say("Your conference was started on " + BeAnywhereCur + ". ")
+		}
+
+		return alexa.NewSSMLResponse("StartIntent NoDevices", builder.Build(), "", true)
+
+	} else {
+
+		var builderReprompt alexa.SSMLBuilder
+
+		builder.Say("What device would you like to start your conference on? ")
+
+		builderReprompt.Say("You can say a telephone number, such as ")
+		builderReprompt.PN("2155551234")
+		builderReprompt.Say(", or say a Be Anywhere device, such as My Cell. ")
+
+		return alexa.NewSSMLResponse("StartIntent NoDevices", builder.Build(), builderReprompt.Build(), false)
+
+	}
+
 }
 
 func IntentDispatcher(request alexa.Request) alexa.Response {
+
 	var response alexa.Response
 	switch request.Body.Intent.Name {
 	case "StartIntent":
 		response = HandleStartIntent(request)
+	//case "StopIntent":
+	//response = HandleStopIntent(request)
 	default:
 		response = HandleStartIntent(request)
 	}
 	return response
+
 }
+
+/*
+func HandleStopIntent(request alexa.Request) alexa.Response {
+
+	var builder alexa.SSMLBuilder
+
+}
+*/
 
 /*
 package main

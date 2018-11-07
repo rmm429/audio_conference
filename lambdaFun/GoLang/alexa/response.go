@@ -1,6 +1,10 @@
 package alexa
 
-import "strings"
+import (
+	"fmt"
+	"log"
+	"strings"
+)
 
 func NewSimpleResponse(title string, text string) Response {
 	r := Response{
@@ -73,54 +77,72 @@ type Payload struct {
 	Image   Image  `json:"image,omitempty"`
 }
 
-func NewSSMLResponse(title string, text string) Response {
-	r := Response{
-		Version: "1.0",
-		Body: ResBody{
-			OutputSpeech: &Payload{
-				Type: "SSML",
-				SSML: text,
+func NewSSMLResponse(title string, text string, reprompt string, endSession bool) Response {
+
+	var r Response
+
+	if reprompt == "" {
+
+		r = Response{
+			Version: "1.0",
+			Body: ResBody{
+				OutputSpeech: &Payload{
+					Type: "SSML",
+					SSML: text,
+				},
+				ShouldEndSession: endSession,
 			},
-			ShouldEndSession: true,
-		},
+		}
+
+	} else {
+
+		r = Response{
+			Version: "1.0",
+			Body: ResBody{
+				OutputSpeech: &Payload{
+					Type: "SSML",
+					SSML: text,
+				},
+				Reprompt: &Reprompt{
+					OutputSpeech: Payload{
+						Type: "SSML",
+						SSML: text,
+					},
+				},
+				ShouldEndSession: endSession,
+			},
+		}
+
 	}
+
+	var b strings.Builder
+	fmt.Fprintf(&b, "Response:\t\t%+v", r)
+	log.Println(b.String())
+
 	return r
+
 }
 
 type SSML struct {
 	text  string
 	pause string
+	pn    string
 }
 
 type SSMLBuilder struct {
 	SSML []SSML
 }
 
-//***Edit with your own parser***
-func ParseString(text string) string {
-	text = strings.ToLower(text)
-	text = strings.Replace(text, "&", "and", -1)
-	text = strings.Replace(text, "+", "plus", -1)
-	text = strings.Replace(text, "@", "at", -1)
-	text = strings.Replace(text, "w/", "with", -1)
-	text = strings.Replace(text, "in.", "inches", -1)
-	text = strings.Replace(text, "s/h", "shipping and handling", -1)
-	text = strings.Replace(text, " ac ", " after coupon ", -1)
-	text = strings.Replace(text, "fs", "free shipping", -1)
-	text = strings.Replace(text, "f/s", "free shipping", -1)
-	text = strings.Replace(text, "-", "", -1)
-	text = strings.Replace(text, "™", "", -1)
-	text = strings.Replace(text, "  ", " ", -1)
-	return text
-}
-
 func (builder *SSMLBuilder) Say(text string) {
-	text = ParseString(text)
 	builder.SSML = append(builder.SSML, SSML{text: text})
 }
 
 func (builder *SSMLBuilder) Pause(pause string) {
 	builder.SSML = append(builder.SSML, SSML{pause: pause})
+}
+
+func (builder *SSMLBuilder) PN(pn string) {
+	builder.SSML = append(builder.SSML, SSML{pn: pn})
 }
 
 func (builder *SSMLBuilder) Build() string {
@@ -130,6 +152,8 @@ func (builder *SSMLBuilder) Build() string {
 			response += ssml.text + " "
 		} else if ssml.pause != "" && index != len(builder.SSML)-1 {
 			response += "<break time='" + ssml.pause + "ms'/>"
+		} else if ssml.pn != "" {
+			response += `<say-as interpret-as="telephone">` + ssml.pn + "</say-as>"
 		}
 	}
 	return "<speak>" + response + "</speak>"
