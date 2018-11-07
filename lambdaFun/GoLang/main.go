@@ -9,6 +9,7 @@ import (
 )
 
 func Handler(request alexa.Request) (alexa.Response, error) {
+	alexa.LogObject("Request", request)
 	return IntentDispatcher(request), nil
 }
 

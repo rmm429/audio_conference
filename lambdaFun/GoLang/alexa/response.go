@@ -1,11 +1,5 @@
 package alexa
 
-import (
-	"fmt"
-	"log"
-	"strings"
-)
-
 func NewSimpleResponse(title string, text string) Response {
 	r := Response{
 		Version: "1.0",
@@ -115,9 +109,7 @@ func NewSSMLResponse(title string, text string, reprompt string, endSession bool
 
 	}
 
-	var b strings.Builder
-	fmt.Fprintf(&b, "Response:\t\t%+v", r)
-	log.Println(b.String())
+	LogObject("Response", r)
 
 	return r
 
