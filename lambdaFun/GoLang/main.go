@@ -17,6 +17,20 @@ func main() {
 	lambda.Start(Handler)
 }
 
+func HandleLaunchRequest(request alexa.Request) alexa.Response {
+
+	var builder alexa.SSMLBuilder
+
+	builder.Say("Welcome to the Audio Conference skill.  ")
+	builder.Say("Using this skill, you can start an audio conference on a telephone number or a Be Anywhere device.  ")
+	builder.Say("You can say, for example, ask audio conference to start a conference on ")
+	builder.PN("2155551234")
+	builder.Say(", or, ask audio conference to start a conference on My Cell. ")
+
+	return alexa.NewSSMLResponse("LaunchRequest", builder.Build(), "", true, request.Session)
+
+}
+
 func HandleStartIntent(request alexa.Request) alexa.Response {
 
 	var builder alexa.SSMLBuilder
@@ -37,9 +51,11 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 			builder.Say("Your conference was started on " + BeAnywhereCur + ". ")
 		}
 
-		return alexa.NewSSMLResponse("StartIntent Device", builder.Build(), "", true)
+		return alexa.NewSSMLResponse("StartIntent Device", builder.Build(), "", true, request.Session)
 
 	} else {
+
+		session := request.Session
 
 		var builderReprompt alexa.SSMLBuilder
 
@@ -49,9 +65,42 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 		builderReprompt.PN("2155551234")
 		builderReprompt.Say(", or say a Be Anywhere device, such as My Cell. ")
 
-		return alexa.NewSSMLResponse("StartIntent NoDevices", builder.Build(), builderReprompt.Build(), false)
+		var attributes map[string]interface{}
+		attributes = make(map[string]interface{})
+		attributes["startIntent"] = true
+		session.Attributes = attributes
+
+		return alexa.NewSSMLResponse("StartIntent NoDevices", builder.Build(), builderReprompt.Build(), false, session)
 
 	}
+
+}
+
+func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
+
+	var builder alexa.SSMLBuilder
+
+	if request.Session.Attributes != nil && request.Session.Attributes["startIntent"] == true {
+
+		slots := request.Body.Intent.Slots
+		PNCur := slots["PN"].Value
+		BeAnywhereCur := slots["BeAnywhere"].Value
+
+		if PNCur != "" {
+
+			builder.Say("Your conference was started on ")
+			builder.PN(PNCur)
+			builder.Say(". ")
+
+		} else if BeAnywhereCur != "" {
+			builder.Say("Your conference was started on " + BeAnywhereCur + ". ")
+		}
+
+	} else {
+		builder.Say("Incorrect usage.  To start a conference, please provide a valid telephone number or Be Anywhere device. ")
+	}
+
+	return alexa.NewSSMLResponse("StartDeviceIntent Device", builder.Build(), "", true, request.Session)
 
 }
 
@@ -79,21 +128,7 @@ func HandleStopIntent(request alexa.Request) alexa.Response {
 
 	}
 
-	return alexa.NewSSMLResponse("StopIntent", builder.Build(), "", true)
-
-}
-
-func HandleLaunchRequest(request alexa.Request) alexa.Response {
-
-	var builder alexa.SSMLBuilder
-
-	builder.Say("Welcome to the Audio Conference skill.  ")
-	builder.Say("Using this skill, you can start an audio conference on a telephone number or a Be Anywhere device.  ")
-	builder.Say("You can say, for example, ask audio conference to start a conference on ")
-	builder.PN("2155551234")
-	builder.Say(", or, ask audio conference to start a conference on My Cell. ")
-
-	return alexa.NewSSMLResponse("LaunchRequest", builder.Build(), "", true)
+	return alexa.NewSSMLResponse("StopIntent", builder.Build(), "", true, request.Session)
 
 }
 
@@ -108,6 +143,8 @@ func IntentDispatcher(request alexa.Request) alexa.Response {
 		switch request.Body.Intent.Name {
 		case "StartIntent":
 			response = HandleStartIntent(request)
+		case "StartDeviceIntent":
+			response = HandleStartDeviceIntent(request)
 		case "StopIntent":
 			response = HandleStopIntent(request)
 		}

@@ -71,42 +71,83 @@ type Payload struct {
 	Image   Image  `json:"image,omitempty"`
 }
 
-func NewSSMLResponse(title string, text string, reprompt string, endSession bool) Response {
+func NewSSMLResponse(title string, text string, reprompt string, endSession bool, session Session) Response {
 
 	var r Response
 
 	if reprompt == "" {
 
-		r = Response{
-			Version: "1.0",
-			Body: ResBody{
-				OutputSpeech: &Payload{
-					Type: "SSML",
-					SSML: text,
+		if session.Attributes != nil {
+
+			r = Response{
+				Version:           "1.0",
+				SessionAttributes: session.Attributes,
+				Body: ResBody{
+					OutputSpeech: &Payload{
+						Type: "SSML",
+						SSML: text,
+					},
+					ShouldEndSession: endSession,
 				},
-				ShouldEndSession: endSession,
-			},
+			}
+
+		} else {
+
+			r = Response{
+				Version: "1.0",
+				Body: ResBody{
+					OutputSpeech: &Payload{
+						Type: "SSML",
+						SSML: text,
+					},
+					ShouldEndSession: endSession,
+				},
+			}
+
 		}
 
 	} else {
 
-		r = Response{
-			Version: "1.0",
-			Body: ResBody{
-				OutputSpeech: &Payload{
-					Type: "SSML",
-					SSML: text,
-				},
-				Reprompt: &Reprompt{
-					OutputSpeech: Payload{
-						Type: "SSML",
-						SSML: reprompt,
-					},
-				},
-				ShouldEndSession: endSession,
-			},
-		}
+		if session.Attributes != nil {
 
+			r = Response{
+				Version:           "1.0",
+				SessionAttributes: session.Attributes,
+				Body: ResBody{
+					OutputSpeech: &Payload{
+						Type: "SSML",
+						SSML: text,
+					},
+					Reprompt: &Reprompt{
+						OutputSpeech: Payload{
+							Type: "SSML",
+							SSML: reprompt,
+						},
+					},
+					ShouldEndSession: endSession,
+				},
+			}
+
+		} else {
+
+			r = Response{
+				Version: "1.0",
+				Body: ResBody{
+					OutputSpeech: &Payload{
+						Type: "SSML",
+						SSML: text,
+					},
+					Reprompt: &Reprompt{
+						OutputSpeech: Payload{
+							Type: "SSML",
+							SSML: reprompt,
+						},
+					},
+					ShouldEndSession: endSession,
+				},
+			}
+
+		}
 	}
 
 	LogObject("Response", r)
