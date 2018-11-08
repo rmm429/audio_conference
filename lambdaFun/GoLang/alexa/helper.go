@@ -3,6 +3,7 @@ package alexa
 import (
 	"encoding/json"
 	"log"
+	"strconv"
 )
 
 var debugGo = false
@@ -101,5 +102,45 @@ func LogObject(identifier string, obj interface{}) {
 	} else {
 		log.Print("\r" + identifier + ":\r" + string(o))
 	}
+
+}
+
+func VerifyPN(PN string) bool {
+
+	runes := []rune(PN)
+
+	//Checking to see if the phone number is 10 digits and does not start with a 0
+	if len(PN) == 10 && string(runes[0:1]) != "0" {
+
+		//Checking to see if there are any non-numeric characters in the phone number
+		if _, err := strconv.Atoi(PN); err == nil {
+			return true
+		}
+
+	}
+
+	return false
+
+}
+
+func FormatPN(PN string) string {
+
+	var PNFormatted string
+
+	if VerifyPN(PN) {
+
+		runes := []rune(PN)
+
+		var areaCode = string(runes[0:3])
+		var middle = string(runes[3:6])
+		var end = string(runes[6])
+
+		PNFormatted = "(" + areaCode + ") " + middle + "-" + end
+
+	} else {
+		PNFormatted = "PHONE NUMBER FORMATTING ERROR"
+	}
+
+	return PNFormatted
 
 }
