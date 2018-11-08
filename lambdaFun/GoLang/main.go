@@ -87,7 +87,7 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 	//Only one slot is filled
 	if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
 
-		//A phone number was provided
+		//A phone number is provided
 		if PNCur != "" {
 
 			//The phone number passed verification
@@ -112,7 +112,7 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 				var speechText = "Invalid phone number.  "
 				speechText += "Please provide a valid 10-digit phone number starting with the area code.  "
-				speechText += `<break time="1s"/>  `
+				//speechText += `<break time="1s"/>  `
 				speechText += "What phone number would you like to start your conference on? "
 				options["speechText"] = speechText
 
@@ -201,7 +201,7 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 		var speechText = "Invalid request.  "
 		speechText += "Please provide a valid phone number or Be Anywhere device.  "
-		speechText += `<break time="1s"/>  `
+		//speechText += `<break time="1s"/>  `
 		speechText += "What device would you like to start your conference on? "
 		options["speechText"] = speechText
 
@@ -262,15 +262,48 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 		//Previously, a phone number was provided alongside the intent StartIntent and failed verification
 		if _, ok := request.Session.Attributes["isPN"]; ok {
 
-			//If the slot is perceived as a phone number
+			//If the slot is perceived as a phone number and passes verification
 			if PNCur != "" && alexa.VerifyPN(PNCur) {
 
-				//Start call on PN and end session
+				var speechText = "Your conference was started on "
+				speechText += `<say-as interpret-as="telephone">` + PNCur + "</say-as>. "
+				options["speechText"] = speechText
+
+				var cardContent = "Your conference was started on " + PNCur + ". "
+				options["cardContent"] = cardContent
+
+				options["imageObj"] = alexa.GetPhoneStartImg()
+
+				var cardTitle = "Audio Conference Start"
+				options["cardTitle"] = cardTitle
+
+				options["endSession"] = true
 
 				//If the slot is perceived as a BeAnywhere device OR the slot is perceived as a phone number but fails verification
 			} else {
 
-				//Notify of failure and continue session
+				var speechText = "Invalid phone number.  "
+				speechText += "Please provide a valid 10-digit phone number starting with the area code.  "
+				//speechText += `<break time="1s"/>  `
+				speechText += "What phone number would you like to start your conference on? "
+				options["speechText"] = speechText
+
+				var repromptText = "For example, you could say "
+				repromptText += `<say-as interpret-as="telephone">2155551234</say-as>. `
+				options["repromptText"] = repromptText
+
+				var cardContent = "Invalid phone number.  "
+				cardContent += "Please provide a valid 10-digit phone number starting with the area code.  "
+				cardContent += "For example, you could say "
+				cardContent += `'(215) 555-1234'.`
+				options["cardContent"] = cardContent
+
+				options["imageObj"] = alexa.GetPhoneErrorImg()
+
+				var cardTitle = "ERROR: Audio Conference Start"
+				options["cardTitle"] = cardTitle
+
+				options["endSession"] = false
 
 			}
 
@@ -280,22 +313,61 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 			//One of the slots is filled
 			if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
 
-				//Both slots are either empty or filled
-			} else {
+				//If a phone number is provided
+				if PNCur != "" {
 
-			}
+					//If the phone number passed verification
+					if alexa.VerifyPN(PNCur) {
 
-			//If a phone number is provided
-			if PNCur != "" {
+						var speechText = "Your conference was started on "
+						speechText += `<say-as interpret-as="telephone">` + PNCur + "</say-as>. "
+						options["speechText"] = speechText
 
-				//If the phone number passed verification
-				if alexa.VerifyPN(PNCur) {
+						var cardContent = "Your conference was started on " + PNCur + ". "
+						options["cardContent"] = cardContent
 
-					var speechText = "Your conference was started on "
-					speechText += `<say-as interpret-as="telephone">` + PNCur + "</say-as>. "
+						options["imageObj"] = alexa.GetPhoneStartImg()
+
+						var cardTitle = "Audio Conference Start"
+						options["cardTitle"] = cardTitle
+
+						options["endSession"] = true
+
+						//If the phone number failed verification
+					} else {
+
+						var speechText = "Invalid phone number.  "
+						speechText += "Please provide a valid 10-digit phone number starting with the area code.  "
+						//speechText += `<break time="1s"/>  `
+						speechText += "What number would you like to start your conference on? "
+						options["speechText"] = speechText
+
+						var repromptText = "For example, you could say ask audio conference to start a conference on "
+						repromptText += `<say-as interpret-as="telephone">2155551234</say-as>. `
+						options["repromptText"] = repromptText
+
+						var cardContent = "Invalid phone number.  "
+						cardContent += "Please provide a valid 10-digit phone number starting with the area code.  "
+						cardContent += "For example, you could say 'ask audio conference to start a conference on "
+						cardContent += `'(215) 555-1234'.`
+						options["cardContent"] = cardContent
+
+						options["imageObj"] = alexa.GetPhoneErrorImg()
+
+						var cardTitle = "ERROR: Audio Conference Start"
+						options["cardTitle"] = cardTitle
+
+						options["endSession"] = false
+
+					}
+
+					//If a Be Anywhere device is provided
+				} else if BeAnywhereCur != "" {
+
+					var speechText = "Your conference was started on " + BeAnywhereCur + ". "
 					options["speechText"] = speechText
 
-					var cardContent = "Your conference was started on " + PNCur + ". "
+					var cardContent = "Your conference was started on " + BeAnywhereCur + "."
 					options["cardContent"] = cardContent
 
 					options["imageObj"] = alexa.GetPhoneStartImg()
@@ -305,55 +377,46 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 
 					options["endSession"] = true
 
-					//If the phone number failed verification
-				} else {
-
-					var speechText = "Invalid phone number.  "
-					speechText += "Please provide a valid 10-digit phone number starting with the area code.  "
-					speechText += `<break time="1s"/>  `
-					speechText += "What number would you like to call? "
-					options["speechText"] = speechText
-
-					var repromptText = "For example, you could say ask audio conference to start a conference on "
-					repromptText += `<say-as interpret-as="telephone">2155551234</say-as>. `
-					options["repromptText"] = repromptText
-
-					var cardContent = "Invalid phone number.  "
-					cardContent += "Please provide a valid 10-digit phone number starting with the area code.  "
-					cardContent += "For example, you could say 'ask audio conference to start a conference on "
-					cardContent += `'(215) 555-1234'.`
-					options["cardContent"] = cardContent
-
-					options["imageObj"] = alexa.GetPhoneErrorImg
-
-					var cardTitle = "ERROR: Audio Conference Start"
-					options["cardTitle"] = cardTitle
-
-					session := request.Session
-					var attributes map[string]interface{}
-					attributes = make(map[string]interface{})
-					attributes["startIntent"] = true
-					attributes["isPN"] = true
-					session.Attributes = attributes
-					options["session"] = session
-
-					options["endSession"] = false
-
 				}
 
-				//If a Be Anywhere device was provided
-			} else if BeAnywhereCur != "" {
+				//Both slots are either empty or filled
+			} else {
 
-				var speechText = "Your conference was started on " + BeAnywhereCur + ". "
+				var speechText = "Invalid request.  "
+				speechText += "Please provide a valid phone number or Be Anywhere device.  "
+				//speechText += `<break time="1s"/>  `
+				speechText += "What device would you like to start your conference on? "
 				options["speechText"] = speechText
 
-				var cardContent = "Your conference was started on " + BeAnywhereCur + "."
+				var repromptText = "You can say a phone number, such as "
+				repromptText += `<say-as interpret-as="telephone">2155551234</say-as>`
+				repromptText += ", or "
+				repromptText += "say a Be Anywhere device, such as "
+				repromptText += "My Cell. "
+				options["repromptText"] = repromptText
+
+				var cardContent = "Invalid request.  "
+				cardContent += "Please provide a valid phone number or Be Anywhere device.  "
+				cardContent = "You can say a phone number, such as "
+				cardContent += `'(215) 555-1234'`
+				cardContent += ", or "
+				cardContent += "say a Be Anywhere device, such as "
+				cardContent += `'My Cell'.`
 				options["cardContent"] = cardContent
 
-				options["imageObj"] = alexa.GetPhoneStartImg()
+				options["imageObj"] = alexa.GetPhoneErrorImg()
 
-				var cardTitle = "Audio Conference Start"
+				var cardTitle = "ERROR: Audio Conference Start"
 				options["cardTitle"] = cardTitle
+
+				session := request.Session
+				var attributes map[string]interface{}
+				attributes = make(map[string]interface{})
+				attributes["startIntent"] = true
+				session.Attributes = attributes
+				options["session"] = session
+
+				options["endSession"] = false
 
 			}
 
@@ -364,7 +427,15 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 
 		var speechText = "Incorrect usage.  "
 		speechText += "To start a conference, please provide a valid phone number or Be Anywhere device. "
+		speechText += "What device would you like to start your conference on? "
 		options["speechText"] = speechText
+
+		var repromptText = "You can say a phone number, such as "
+		repromptText += `<say-as interpret-as="telephone">2155551234</say-as>`
+		repromptText += ", or "
+		repromptText += "say a Be Anywhere device, such as "
+		repromptText += "My Cell. "
+		options["repromptText"] = repromptText
 
 		var cardContent = "Incorrect usage.  "
 		cardContent += "To start a conference, please provide a valid phone number or Be Anywhere device."
@@ -375,7 +446,7 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 		var cardTitle = "ERROR: Audio Conference Start"
 		options["cardTitle"] = cardTitle
 
-		options["endSession"] = true
+		options["endSession"] = false
 
 	}
 
