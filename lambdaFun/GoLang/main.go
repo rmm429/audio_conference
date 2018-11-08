@@ -18,6 +18,18 @@ func Handler(request alexa.Request) (alexa.Response, error) {
 		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable GO_DEBUG_EN is either 0 or not set\r")
 	}
 
+	if os.Getenv("USERINFO_DEBUG_EN") == "1" {
+		alexa.SetDebugUserInfo(true)
+	} else {
+		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable OPTIONS_DEBUG_EN is either 0 or not set\r")
+	}
+
+	if os.Getenv("OPTIONS_DEBUG_EN") == "1" {
+		alexa.SetDebugOptions(true)
+	} else {
+		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable OPTIONS_DEBUG_EN is either 0 or not set\r")
+	}
+
 	if alexa.GetDebugGo() {
 		alexa.LogObject("Request", request)
 	}
@@ -46,7 +58,13 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 
 func HandleStartIntent(request alexa.Request) alexa.Response {
 
-	var builder alexa.SSMLBuilder
+	//var options map[interface{}]interface{}
+	//options = make(map[interface{}]interface{})
+
+	var options map[string]interface{}
+	options = make(map[string]interface{})
+
+	//var builder alexa.SSMLBuilder
 
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
@@ -56,36 +74,81 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 		if PNCur != "" {
 
-			builder.Say("Your conference was started on ")
-			builder.PN(PNCur)
-			builder.Say(". ")
+			var speechText = `Your conference was started on <say-as interpret-as="telephone">` + PNCur + "</say-as>. "
+			options["speechText"] = speechText
+
+			var cardContent = "Your conference was started on " + PNCur + ". "
+			options["cardContent"] = cardContent
+
+			/*
+				builder.Say("Your conference was started on ")
+				builder.PN(PNCur)
+				builder.Say(". ")
+			*/
 
 		} else if BeAnywhereCur != "" {
-			builder.Say("Your conference was started on " + BeAnywhereCur + ". ")
+
+			//builder.Say("Your conference was started on " + BeAnywhereCur + ". ")
+
+			var text = "Your conference was started on " + BeAnywhereCur + ". "
+			options["speechText"] = text
+			options["cardContent"] = text
+
 		}
 
-		return alexa.NewSSMLResponse("StartIntent Device", builder.Build(), "", true, request.Session)
+		options["imageObj"] = alexa.GetPhoneStartImg()
+		options["endSession"] = true
+
+		//return alexa.NewSSMLResponse("StartIntent Device", builder.Build(), "", true, request.Session)
 
 	} else {
 
 		session := request.Session
 
+		options["session"] = request.Session
+
 		var builderReprompt alexa.SSMLBuilder
 
-		builder.Say("What device would you like to start your conference on? ")
+		var speechText = "What device would you like to start your conference on? "
+		options["speechText"] = speechText
 
-		builderReprompt.Say("You can say a telephone number, such as ")
-		builderReprompt.PN("2155551234")
-		builderReprompt.Say(", or say a Be Anywhere device, such as My Cell. ")
+		var repromptText = `You can say a telephone number, such as <say-as interpret-as=\"telephone\">2155551234</say-as>, or say a Be Anywhere device, such as My Cell.`
+		options["repromptText"] = repromptText
+
+		var cardContent = "You can say a telephone number, such as 2155551234, or say a Be Anywhere device, such as My Cell."
+		options["cardContent"] = cardContent
+
+		options["imageObj"] = alexa.GetQuestionImg()
+		options["endSession"] = false
+
+		/*
+			builder.Say("What device would you like to start your conference on? ")
+
+			builderReprompt.Say("You can say a telephone number, such as ")
+			builderReprompt.PN("2155551234")
+			builderReprompt.Say(", or say a Be Anywhere device, such as My Cell. ")
+		*/
 
 		var attributes map[string]interface{}
 		attributes = make(map[string]interface{})
 		attributes["startIntent"] = true
 		session.Attributes = attributes
+		options["session"] = session
 
-		return alexa.NewSSMLResponse("StartIntent NoDevices", builder.Build(), builderReprompt.Build(), false, session)
+		options["endSession"] = false
+
+		//return alexa.NewSSMLResponse("StartIntent NoDevices", builder.Build(), builderReprompt.Build(), false, session)
 
 	}
+
+	var cardTitle = "Audio Conference Start"
+	options["cardTitle"] = cardTitle
+
+	if alexa.GetDebugOptions() {
+		alexa.LogObject("Options (StartIntent)", options)
+	}
+
+	return alexa.BuildResponse(options)
 
 }
 
@@ -119,7 +182,10 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 
 func HandleStopIntent(request alexa.Request) alexa.Response {
 
-	var builder alexa.SSMLBuilder
+	//var builder alexa.SSMLBuilder
+
+	var options map[string]interface{}
+	options = make(map[string]interface{})
 
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
@@ -127,21 +193,48 @@ func HandleStopIntent(request alexa.Request) alexa.Response {
 
 	if PNCur != "" {
 
-		builder.Say("Your conference was stopped on ")
-		builder.PN(PNCur)
-		builder.Say(". ")
+		var speechText = `Your conference was stopped on <say-as interpret-as="telephone">` + PNCur + "</say-as>. "
+		options["speechText"] = speechText
+
+		var cardContent = "Your conference was stopped on " + PNCur + ". "
+		options["cardContent"] = cardContent
+
+		/*
+			builder.Say("Your conference was stopped on ")
+			builder.PN(PNCur)
+			builder.Say(". ")
+		*/
 
 	} else if BeAnywhereCur != "" {
 
-		builder.Say("Your conference was stopped on " + BeAnywhereCur + ". ")
+		var text = "Your conference was stopped on " + BeAnywhereCur + ". "
+		options["speechText"] = text
+		options["cardContent"] = text
+
+		//builder.Say("Your conference was stopped on " + BeAnywhereCur + ". ")
 
 	} else {
 
-		builder.Say("Your conference was stopped. ")
+		var text = "Your conference was stopped. "
+		options["speechText"] = text
+		options["cardContent"] = text
+
+		//builder.Say("Your conference was stopped. ")
 
 	}
 
-	return alexa.NewSSMLResponse("StopIntent", builder.Build(), "", true, request.Session)
+	options["imageObj"] = alexa.GetPhoneStopImg()
+
+	var cardTitle = "Audio Conference Stop"
+	options["cardTitle"] = cardTitle
+
+	if alexa.GetDebugOptions() {
+		alexa.LogObject("Options (StopIntent)", options)
+	}
+
+	//return alexa.NewSSMLResponse("StopIntent", builder.Build(), "", true, request.Session)
+
+	return alexa.BuildResponse(options)
 
 }
 

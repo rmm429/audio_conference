@@ -71,6 +71,69 @@ type Payload struct {
 	Image   Image  `json:"image,omitempty"`
 }
 
+func BuildResponse(options map[string]interface{}) Response {
+
+	var response = Response{
+		Version: "1.0",
+		Body: ResBody{
+			OutputSpeech: &Payload{
+				Type: "SSML",
+				SSML: "<speak>" + options["speechText"].(string) + "</speak>",
+			},
+			ShouldEndSession: options["endSession"].(bool),
+		},
+	}
+
+	//If does not work, change repromptText to "var" and use options["repromptText"] instead of "repromptText"
+	if repromptText, ok := options["repromptText"]; ok {
+
+		response.Body.Reprompt = &Reprompt{
+			OutputSpeech: Payload{
+				Type: "SSML",
+				SSML: "<speak>" + repromptText.(string) + "</speak>",
+			},
+		}
+
+	}
+
+	//If does not work, change cardTitle to "var" and use options["cardTitle"] instead of "cardTitle"
+	if cardTitle, ok := options["cardTitle"]; ok {
+
+		response.Body.Card = &Payload{
+			Type:  "Simple",
+			Title: cardTitle.(string),
+		}
+
+		//If does not work, change imageUrl to "var" and use options["imageUrl"] instead of "imageUrl"
+		if imageUrl, ok := options["imageUrl"]; ok {
+
+			response.Body.Card.Type = "Standard"
+			response.Body.Card.Text = options["cardContent"].(string)
+			response.Body.Card.Image = Image{
+				SmallImageURL: imageUrl.(string),
+				LargeImageURL: imageUrl.(string),
+			}
+
+			//If does not work, change imageObj to "var" and use options["imageObj"] instead of "imageObj"
+		} else if imageObj, ok := options["imageObj"]; ok {
+
+			response.Body.Card.Type = "Standard"
+			response.Body.Card.Text = options["cardContent"].(string)
+			response.Body.Card.Image = Image{
+				SmallImageURL: (imageObj.(CardImg)).Small,
+				LargeImageURL: (imageObj.(CardImg)).Large,
+			}
+
+		} else {
+			response.Body.Card.Content = options["cardContent"].(string)
+		}
+
+	}
+
+	return response
+
+}
+
 func NewSSMLResponse(title string, text string, reprompt string, endSession bool, session Session) Response {
 
 	var r Response
