@@ -1,8 +1,6 @@
 package main
 
 import (
-	//"strings"
-
 	"audio_conference/lambdaFun/GoLang/alexa"
 	"log"
 	"os"
@@ -21,7 +19,7 @@ func Handler(request alexa.Request) (alexa.Response, error) {
 	if os.Getenv("USERINFO_DEBUG_EN") == "1" {
 		alexa.SetDebugUserInfo(true)
 	} else {
-		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable OPTIONS_DEBUG_EN is either 0 or not set\r")
+		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable USERINFO_DEBUG_EN is either 0 or not set\r")
 	}
 
 	if os.Getenv("OPTIONS_DEBUG_EN") == "1" {
@@ -44,27 +42,41 @@ func main() {
 
 func HandleLaunchRequest(request alexa.Request) alexa.Response {
 
-	var builder alexa.SSMLBuilder
+	var options map[string]interface{}
+	options = make(map[string]interface{})
 
-	builder.Say("Welcome to the Audio Conference skill.  ")
-	builder.Say("Using this skill, you can start an audio conference on a telephone number or a Be Anywhere device.  ")
-	builder.Say("You can say, for example, ask audio conference to start a conference on ")
-	builder.PN("2155551234")
-	builder.Say(", or, ask audio conference to start a conference on My Cell. ")
+	var speechText = "Welcome to the Audio Conference skill.  "
+	speechText += "You can say, for example, "
+	speechText += "ask audio conference to start a conference on "
+	speechText += `<say-as interpret-as="telephone">2155551234</say-as>`
+	speechText += ", or, "
+	speechText += "ask audio conference to start a conference on My Cell. "
+	options["speechText"] = speechText
 
-	return alexa.NewSSMLResponse("LaunchRequest", builder.Build(), "", true, request.Session)
+	var cardContent = "Welcome to the Audio Conference skill.  "
+	cardContent += "You can say, for example, "
+	cardContent += `'ask audio conference to start a conference on 2155551234'`
+	cardContent += ", or, "
+	cardContent += `'ask audio conference to start a conference on My Cell'.`
+	options["cardContent"] = cardContent
+
+	var cardTitle = "Audio Conference"
+	options["cardTitle"] = cardTitle
+
+	options["endSession"] = true
+
+	if alexa.GetDebugOptions() {
+		alexa.LogObject("Options (StartIntent)", options)
+	}
+
+	return alexa.BuildResponse(options)
 
 }
 
 func HandleStartIntent(request alexa.Request) alexa.Response {
 
-	//var options map[interface{}]interface{}
-	//options = make(map[interface{}]interface{})
-
 	var options map[string]interface{}
 	options = make(map[string]interface{})
-
-	//var builder alexa.SSMLBuilder
 
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
@@ -74,60 +86,49 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 		if PNCur != "" {
 
-			var speechText = `Your conference was started on <say-as interpret-as="telephone">` + PNCur + "</say-as>. "
+			var speechText = "Your conference was started on "
+			speechText += `<say-as interpret-as="telephone">` + PNCur + "</say-as>. "
 			options["speechText"] = speechText
 
 			var cardContent = "Your conference was started on " + PNCur + ". "
 			options["cardContent"] = cardContent
 
-			/*
-				builder.Say("Your conference was started on ")
-				builder.PN(PNCur)
-				builder.Say(". ")
-			*/
-
 		} else if BeAnywhereCur != "" {
 
-			//builder.Say("Your conference was started on " + BeAnywhereCur + ". ")
+			var speechText = "Your conference was started on " + BeAnywhereCur + ". "
+			options["speechText"] = speechText
 
-			var text = "Your conference was started on " + BeAnywhereCur + ". "
-			options["speechText"] = text
-			options["cardContent"] = text
+			var cardContent = "Your conference was started on " + BeAnywhereCur + "."
+			options["cardContent"] = cardContent
 
 		}
 
 		options["imageObj"] = alexa.GetPhoneStartImg()
 		options["endSession"] = true
 
-		//return alexa.NewSSMLResponse("StartIntent Device", builder.Build(), "", true, request.Session)
-
 	} else {
 
 		session := request.Session
 
-		options["session"] = request.Session
-
-		var builderReprompt alexa.SSMLBuilder
-
 		var speechText = "What device would you like to start your conference on? "
 		options["speechText"] = speechText
 
-		var repromptText = `You can say a telephone number, such as <say-as interpret-as=\"telephone\">2155551234</say-as>, or say a Be Anywhere device, such as My Cell.`
+		var repromptText = "You can say a telephone number, such as "
+		repromptText += `<say-as interpret-as="telephone">2155551234</say-as>`
+		repromptText += ", or "
+		repromptText += "say a Be Anywhere device, such as "
+		repromptText += "My Cell. "
 		options["repromptText"] = repromptText
 
-		var cardContent = "You can say a telephone number, such as 2155551234, or say a Be Anywhere device, such as My Cell."
+		var cardContent = "You can say a telephone number, such as "
+		cardContent += `'2155551234'`
+		cardContent += ", or "
+		cardContent += "say a Be Anywhere device, such as "
+		cardContent += `'My Cell'.`
 		options["cardContent"] = cardContent
 
 		options["imageObj"] = alexa.GetQuestionImg()
 		options["endSession"] = false
-
-		/*
-			builder.Say("What device would you like to start your conference on? ")
-
-			builderReprompt.Say("You can say a telephone number, such as ")
-			builderReprompt.PN("2155551234")
-			builderReprompt.Say(", or say a Be Anywhere device, such as My Cell. ")
-		*/
 
 		var attributes map[string]interface{}
 		attributes = make(map[string]interface{})
@@ -136,8 +137,6 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 		options["session"] = session
 
 		options["endSession"] = false
-
-		//return alexa.NewSSMLResponse("StartIntent NoDevices", builder.Build(), builderReprompt.Build(), false, session)
 
 	}
 
@@ -154,7 +153,8 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 
-	var builder alexa.SSMLBuilder
+	var options map[string]interface{}
+	options = make(map[string]interface{})
 
 	if request.Session.Attributes != nil && request.Session.Attributes["startIntent"] == true {
 
@@ -164,25 +164,50 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 
 		if PNCur != "" {
 
-			builder.Say("Your conference was started on ")
-			builder.PN(PNCur)
-			builder.Say(". ")
+			var speechText = "Your conference was started on "
+			speechText += `<say-as interpret-as="telephone">` + PNCur + "</say-as>. "
+			options["speechText"] = speechText
+
+			var cardContent = "Your conference was started on " + PNCur + ". "
+			options["cardContent"] = cardContent
 
 		} else if BeAnywhereCur != "" {
-			builder.Say("Your conference was started on " + BeAnywhereCur + ". ")
+
+			var speechText = "Your conference was started on " + BeAnywhereCur + ". "
+			options["speechText"] = speechText
+
+			var cardContent = "Your conference was started on " + BeAnywhereCur + "."
+			options["cardContent"] = cardContent
+
 		}
 
+		options["imageObj"] = alexa.GetPhoneStartImg()
+
 	} else {
-		builder.Say("Incorrect usage.  To start a conference, please provide a valid telephone number or Be Anywhere device. ")
+
+		var speechText = "Incorrect usage.  "
+		speechText += "To start a conference, please provide a valid telephone number or Be Anywhere device. "
+		options["speechText"] = speechText
+
+		var cardContent = "Incorrect usage.  "
+		cardContent += "To start a conference, please provide a valid telephone number or Be Anywhere device."
+		options["cardContent"] = cardContent
+
+		options["imageObj"] = alexa.GetPhoneErrorImg()
+
 	}
 
-	return alexa.NewSSMLResponse("StartDeviceIntent Device", builder.Build(), "", true, request.Session)
+	options["endSession"] = true
+
+	if alexa.GetDebugOptions() {
+		alexa.LogObject("Options (StartDeviceIntent)", options)
+	}
+
+	return alexa.BuildResponse(options)
 
 }
 
 func HandleStopIntent(request alexa.Request) alexa.Response {
-
-	//var builder alexa.SSMLBuilder
 
 	var options map[string]interface{}
 	options = make(map[string]interface{})
@@ -199,27 +224,17 @@ func HandleStopIntent(request alexa.Request) alexa.Response {
 		var cardContent = "Your conference was stopped on " + PNCur + ". "
 		options["cardContent"] = cardContent
 
-		/*
-			builder.Say("Your conference was stopped on ")
-			builder.PN(PNCur)
-			builder.Say(". ")
-		*/
-
 	} else if BeAnywhereCur != "" {
 
 		var text = "Your conference was stopped on " + BeAnywhereCur + ". "
 		options["speechText"] = text
 		options["cardContent"] = text
 
-		//builder.Say("Your conference was stopped on " + BeAnywhereCur + ". ")
-
 	} else {
 
 		var text = "Your conference was stopped. "
 		options["speechText"] = text
 		options["cardContent"] = text
-
-		//builder.Say("Your conference was stopped. ")
 
 	}
 
@@ -228,11 +243,11 @@ func HandleStopIntent(request alexa.Request) alexa.Response {
 	var cardTitle = "Audio Conference Stop"
 	options["cardTitle"] = cardTitle
 
+	options["endSession"] = true
+
 	if alexa.GetDebugOptions() {
 		alexa.LogObject("Options (StopIntent)", options)
 	}
-
-	//return alexa.NewSSMLResponse("StopIntent", builder.Build(), "", true, request.Session)
 
 	return alexa.BuildResponse(options)
 
@@ -260,64 +275,3 @@ func IntentDispatcher(request alexa.Request) alexa.Response {
 	return response
 
 }
-
-/*
-package main
-
-import (
-	"fmt"
-	//"encoding/json"
-	"strings"
-)
-
-type Info struct {
-	StartIntent bool
-	PN string
-	BeAnywhere string
-}
-
-type UserInfo struct {
-	UserId string
-	Info Info
-}
-
-type CardImg struct {
-	Small string
-	Large string
-}
-
-//<a href="https://www.iconfinder.com/icons/309047/conference_group_people_users_icon" target="_blank">"Conference, group, people, users icon"</a> by <a href="https://www.iconfinder.com/visualpharm" target="_blank">Ivan Boyko</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>
-//"Conference, group, people, users icon" (https://www.iconfinder.com/icons/309047/conference_group_people_users_icon) by Ivan Boyko (https://www.iconfinder.com/visualpharm) is licensed under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0)
-var conferenceImg CardImg
-conferenceImg.Small = "https://s3.amazonaws.com/audio-conference/images/conferenceSmall.png"
-conferenceImg.Large = "https://s3.amazonaws.com/audio-conference/images/conferenceLarge.png"
-
-//<a href="https://www.iconfinder.com/icons/3324959/outgoing_phone_icon" target="_blank">"Outgoing, phone icon"</a> by <a href="https://www.iconfinder.com/colebemis" target="_blank">Cole Bemis</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>
-//"Outgoing, phone icon" (https://www.iconfinder.com/icons/3324959/outgoing_phone_icon) by Cole Bemis (https://www.iconfinder.com/colebemis) is licensed under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0)
-var phoneStartImg CardImg
-phoneStartImg.Small = "https://s3.amazonaws.com/audio-conference/images/phoneStartSmall.png"
-phoneStartImg.Large = "https://s3.amazonaws.com/audio-conference/images/phoneStartLarge.png"
-
-//<a href="https://www.iconfinder.com/icons/3324961/missed_phone_icon" target="_blank">"Missed, phone icon"</a> by <a href="https://www.iconfinder.com/colebemis" target="_blank">Cole Bemis</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>
-//"Missed, phone icon" (https://www.iconfinder.com/icons/3324961/missed_phone_icon) by Cole Bemis (https://www.iconfinder.com/colebemis) is licensed under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0)
-var phoneStopImg CardImg
-phoneStopImg.Small = "https://s3.amazonaws.com/audio-conference/images/phoneStopSmall.png"
-phoneStopImg.Large = "https://s3.amazonaws.com/audio-conference/images/phoneStopLarge.png"
-
-//<a href="https://www.iconfinder.com/icons/3324960/off_phone_icon" target="_blank">"Off, phone icon"</a> by <a href="https://www.iconfinder.com/colebemis" target="_blank">Cole Bemis</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>
-//"Off, phone icon" (https://www.iconfinder.com/icons/3324960/off_phone_icon) by Cole Bemis (https://www.iconfinder.com/colebemis) is licensed under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0)
-var phoneErrorImg CardImg
-phoneErrorImg.Small = "https://s3.amazonaws.com/audio-conference/images/phoneErrorSmall.png"
-phoneErrorImg.Large = "https://s3.amazonaws.com/audio-conference/images/phoneErrorLarge.png"
-
-//<a href="https://www.iconfinder.com/icons/183285/help_mark_question_icon" target="_blank">"Help, mark, question icon"</a> by <a href="https://www.iconfinder.com/yanlu" target="_blank">Yannick Lung</a>
-//"Help, mark, question icon" (https://www.iconfinder.com/icons/183285/help_mark_question_icon) by Yannick Lung (https://www.iconfinder.com/yanlu)
-var questionImg CardImg
-questionImg.Small = "https://s3.amazonaws.com/audio-conference/images/questionSmall.png"
-questionImg.Large = "https://s3.amazonaws.com/audio-conference/images/questionLarge.png"
-
-
-func main() {
-	fmt.Println("Hello!")
-}
-*/

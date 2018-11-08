@@ -84,7 +84,14 @@ func BuildResponse(options map[string]interface{}) Response {
 		},
 	}
 
-	//If does not work, change repromptText to "var" and use options["repromptText"] instead of "repromptText"
+	if session, ok := options["session"]; ok {
+
+		if (session.(Session)).Attributes != nil {
+			response.SessionAttributes = (session.(Session)).Attributes
+		}
+
+	}
+
 	if repromptText, ok := options["repromptText"]; ok {
 
 		response.Body.Reprompt = &Reprompt{
@@ -96,7 +103,6 @@ func BuildResponse(options map[string]interface{}) Response {
 
 	}
 
-	//If does not work, change cardTitle to "var" and use options["cardTitle"] instead of "cardTitle"
 	if cardTitle, ok := options["cardTitle"]; ok {
 
 		response.Body.Card = &Payload{
@@ -104,7 +110,6 @@ func BuildResponse(options map[string]interface{}) Response {
 			Title: cardTitle.(string),
 		}
 
-		//If does not work, change imageUrl to "var" and use options["imageUrl"] instead of "imageUrl"
 		if imageUrl, ok := options["imageUrl"]; ok {
 
 			response.Body.Card.Type = "Standard"
@@ -114,7 +119,6 @@ func BuildResponse(options map[string]interface{}) Response {
 				LargeImageURL: imageUrl.(string),
 			}
 
-			//If does not work, change imageObj to "var" and use options["imageObj"] instead of "imageObj"
 		} else if imageObj, ok := options["imageObj"]; ok {
 
 			response.Body.Card.Type = "Standard"
@@ -130,129 +134,10 @@ func BuildResponse(options map[string]interface{}) Response {
 
 	}
 
+	if GetDebugGo() {
+		LogObject("Response", response)
+	}
+
 	return response
 
-}
-
-func NewSSMLResponse(title string, text string, reprompt string, endSession bool, session Session) Response {
-
-	var r Response
-
-	if reprompt == "" {
-
-		if session.Attributes != nil {
-
-			r = Response{
-				Version:           "1.0",
-				SessionAttributes: session.Attributes,
-				Body: ResBody{
-					OutputSpeech: &Payload{
-						Type: "SSML",
-						SSML: text,
-					},
-					ShouldEndSession: endSession,
-				},
-			}
-
-		} else {
-
-			r = Response{
-				Version: "1.0",
-				Body: ResBody{
-					OutputSpeech: &Payload{
-						Type: "SSML",
-						SSML: text,
-					},
-					ShouldEndSession: endSession,
-				},
-			}
-
-		}
-
-	} else {
-
-		if session.Attributes != nil {
-
-			r = Response{
-				Version:           "1.0",
-				SessionAttributes: session.Attributes,
-				Body: ResBody{
-					OutputSpeech: &Payload{
-						Type: "SSML",
-						SSML: text,
-					},
-					Reprompt: &Reprompt{
-						OutputSpeech: Payload{
-							Type: "SSML",
-							SSML: reprompt,
-						},
-					},
-					ShouldEndSession: endSession,
-				},
-			}
-
-		} else {
-
-			r = Response{
-				Version: "1.0",
-				Body: ResBody{
-					OutputSpeech: &Payload{
-						Type: "SSML",
-						SSML: text,
-					},
-					Reprompt: &Reprompt{
-						OutputSpeech: Payload{
-							Type: "SSML",
-							SSML: reprompt,
-						},
-					},
-					ShouldEndSession: endSession,
-				},
-			}
-
-		}
-	}
-
-	if GetDebugGo() {
-		LogObject("Response", r)
-	}
-
-	return r
-
-}
-
-type SSML struct {
-	text  string
-	pause string
-	pn    string
-}
-
-type SSMLBuilder struct {
-	SSML []SSML
-}
-
-func (builder *SSMLBuilder) Say(text string) {
-	builder.SSML = append(builder.SSML, SSML{text: text})
-}
-
-func (builder *SSMLBuilder) Pause(pause string) {
-	builder.SSML = append(builder.SSML, SSML{pause: pause})
-}
-
-func (builder *SSMLBuilder) PN(pn string) {
-	builder.SSML = append(builder.SSML, SSML{pn: pn})
-}
-
-func (builder *SSMLBuilder) Build() string {
-	var response string
-	for index, ssml := range builder.SSML {
-		if ssml.text != "" {
-			response += ssml.text + " "
-		} else if ssml.pause != "" && index != len(builder.SSML)-1 {
-			response += "<break time='" + ssml.pause + "ms'/>"
-		} else if ssml.pn != "" {
-			response += `<say-as interpret-as="telephone">` + ssml.pn + "</say-as>"
-		}
-	}
-	return "<speak>" + response + "</speak>"
 }
