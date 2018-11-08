@@ -9,6 +9,6 @@ printf "Enter commit message:\n"
 read message
 git commit -m "$message"
 
-printf "\n"
+printf "\n\n"
 
 git push
