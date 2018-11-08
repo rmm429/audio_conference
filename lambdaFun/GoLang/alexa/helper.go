@@ -5,6 +5,16 @@ import (
 	"log"
 )
 
+var debugGo = false
+
+func GetDebugGo() bool {
+	return debugGo
+}
+
+func SetDebugGo(dg bool) {
+	debugGo = dg
+}
+
 func LogObject(identifier string, obj interface{}) {
 
 	o, err := json.Marshal(obj)

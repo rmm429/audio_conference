@@ -4,13 +4,26 @@ import (
 	//"strings"
 
 	"audio_conference/lambdaFun/GoLang/alexa"
+	"log"
+	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
 func Handler(request alexa.Request) (alexa.Response, error) {
-	alexa.LogObject("Request", request)
+
+	if os.Getenv("GO_DEBUG_EN") == "1" {
+		alexa.SetDebugGo(true)
+	} else {
+		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable GO_DEBUG_EN is either 0 or not set\r")
+	}
+
+	if alexa.GetDebugGo() {
+		alexa.LogObject("Request", request)
+	}
+
 	return IntentDispatcher(request), nil
+
 }
 
 func main() {

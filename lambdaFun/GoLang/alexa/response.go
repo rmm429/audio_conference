@@ -150,7 +150,9 @@ func NewSSMLResponse(title string, text string, reprompt string, endSession bool
 		}
 	}
 
-	LogObject("Response", r)
+	if GetDebugGo() {
+		LogObject("Response", r)
+	}
 
 	return r
 
