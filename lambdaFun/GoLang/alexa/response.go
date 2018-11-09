@@ -73,6 +73,10 @@ type Payload struct {
 
 func BuildResponse(options map[string]interface{}) Response {
 
+	if GetDebugOptions() {
+		LogObject("Options", options)
+	}
+
 	var response = Response{
 		Version: "1.0",
 		Body: ResBody{

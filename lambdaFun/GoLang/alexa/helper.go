@@ -10,11 +10,56 @@ var debugGo = false
 var debugUserInfo = false
 var debugOptions = false
 
-//var options map[string]interface{}
-
 type CardImg struct {
 	Small string
 	Large string
+}
+
+type LogTrace struct {
+	LaunchRequest                     bool                              `json:"LaunchRequest,omitempty"`
+	StartConferenceIntent             StartConferenceIntent             `json:"StartConferenceIntent,omitempty"`
+	StartConferenceDeviceIntentIntent StartConferenceDeviceIntentIntent `json:"StartConferenceDeviceIntentIntent,omitempty"`
+	StopConferenceIntent              StopConferenceIntent              `json:"StopConferenceIntent,omitempty"`
+}
+
+type StartConferenceIntent struct {
+	OneSlot   OneSlot `json:"OneSlot,omitempty"`
+	NoSlots   bool    `json:"NoSlots,omitempty"`
+	BothSlots bool    `json:"BothSlots,omitempty"`
+}
+
+type OneSlot struct {
+	PN         PN   `json:"PN,omitempty"`
+	BeAnywhere bool `json:"BeAnywhere,omitempty"`
+}
+
+type PN struct {
+	Verify bool `json:"Verify,omitempty"`
+}
+
+type StartConferenceDeviceIntentIntent struct {
+	SessionAttributes   SessionAttributes `json:"SessionAttributes,omitempty"`
+	NoSessionAttributes bool              `json:"NoSessionAttributes,omitempty"`
+}
+
+type SessionAttributes struct {
+	Previous_PN_VerifyFalse   Previous_PN_VerifyFalse   `json:"Previous_PN_VerifyFalse,omitempty"`
+	Previous_NoSlotsOrInvalid Previous_NoSlotsOrInvalid `json:"Previous_NoSlotsOrInvalid,omitempty"`
+}
+
+type Previous_PN_VerifyFalse struct {
+	Cur_PN PN `json:"Cur_Device,omitempty"`
+}
+
+type Previous_NoSlotsOrInvalid struct {
+	Cur_OneSlot            OneSlot `json:"Cur_OneSlot,omitempty"`
+	Cur_NoSlotsOrBothSlots bool    `json:"Cur_NoSlotsOrBothSlots,omitempty"`
+}
+
+type StopConferenceIntent struct {
+	PN         bool `json:"PN,omitempty"`
+	BeAnywhere bool `json:"BeAnywhere,omitempty"`
+	NoSlots    bool `json:"NoSlots,omitempty"`
 }
 
 //<a href="https://www.iconfinder.com/icons/309047/conference_group_people_users_icon" target="_blank">"Conference, group, people, users icon"</a> by <a href="https://www.iconfinder.com/visualpharm" target="_blank">Ivan Boyko</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>

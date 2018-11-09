@@ -45,6 +45,8 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 	var options map[string]interface{}
 	options = make(map[string]interface{})
 
+	var LogTrace alexa.LogTrace
+
 	var speechText = "Welcome to the Audio Conference skill.  "
 	speechText += "You can say, for example, "
 	speechText += "ask audio conference to start a conference on "
@@ -67,18 +69,19 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 
 	options["endSession"] = true
 
-	if alexa.GetDebugOptions() {
-		alexa.LogObject("Options (StartIntent)", options)
-	}
+	LogTrace.LaunchRequest = true
+	alexa.LogObject("Trace", LogTrace)
 
 	return alexa.BuildResponse(options)
 
 }
 
-func HandleStartIntent(request alexa.Request) alexa.Response {
+func HandleStartConferenceIntent(request alexa.Request) alexa.Response {
 
 	var options map[string]interface{}
 	options = make(map[string]interface{})
+
+	var LogTrace alexa.LogTrace
 
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
@@ -87,12 +90,8 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 	//Only one slot is filled
 	if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
 
-		alexa.LogObject("StartIntent invoked: One Slot provided", nil)
-
 		//A phone number is provided
 		if PNCur != "" {
-
-			alexa.LogObject("Current Slot: PN", nil)
 
 			//The phone number passed verification
 			if alexa.VerifyPN(PNCur) {
@@ -100,7 +99,7 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 				//PN_Pass
 				options = OptionTemplates("PN_Pass", request, PNCur)
 
-				alexa.LogObject("PN Passed Verification", nil)
+				LogTrace.StartConferenceIntent.OneSlot.PN.Verify = true
 
 				//The phone number failed verification
 			} else {
@@ -108,7 +107,7 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 				//PN_Fail
 				options = OptionTemplates("PN_Fail", request, "")
 
-				alexa.LogObject("PN Failed Verification", nil)
+				LogTrace.StartConferenceIntent.OneSlot.PN.Verify = false
 
 			}
 
@@ -118,7 +117,7 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 			//BeAnywhere
 			options = OptionTemplates("BeAnywhere", request, BeAnywhereCur)
 
-			alexa.LogObject("Current Slot: Be Anywhere", nil)
+			LogTrace.StartConferenceIntent.OneSlot.BeAnywhere = true
 
 		}
 
@@ -128,7 +127,7 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 		//Start_BothEmpty
 		options = OptionTemplates("Start_BothEmpty", request, "")
 
-		alexa.LogObject("StartIntent invoked: Both Slots Empty", nil)
+		LogTrace.StartConferenceIntent.BothSlots = true
 
 		//Both slots are filled
 	} else {
@@ -136,32 +135,32 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 		//Invalid
 		options = OptionTemplates("Invalid", request, "")
 
-		alexa.LogObject("StartIntent invoked: Both Slots Filled", nil)
+		LogTrace.StartConferenceIntent.NoSlots = true
 
 	}
+
+	alexa.LogObject("Trace", LogTrace)
 
 	return alexa.BuildResponse(options)
 
 }
 
-func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
+func HandleStartConferenceDeviceIntentIntent(request alexa.Request) alexa.Response {
 
 	var options map[string]interface{}
 	options = make(map[string]interface{})
 
-	//If session attributes exist and this intent was invoked by the intent StartIntent
-	if request.Session.Attributes != nil && request.Session.Attributes["startIntent"] == true {
+	var LogTrace alexa.LogTrace
 
-		alexa.LogObject("StartDeviceIntent invoked: Session Attributes Exist, Invoked by StartIntent", nil)
+	//If session attributes exist and this intent was invoked by the intent StartConferenceIntent
+	if request.Session.Attributes != nil && request.Session.Attributes["startConferenceIntent"] == true {
 
 		slots := request.Body.Intent.Slots
 		PNCur := slots["PN"].Value
 		BeAnywhereCur := slots["BeAnywhere"].Value
 
-		//Previously, a phone number was provided alongside the intent StartIntent and failed verification
+		//Previously, a phone number was provided alongside the intent StartConferenceIntent and failed verification
 		if _, ok := request.Session.Attributes["isPN"]; ok {
-
-			alexa.LogObject("Previous invocation: PN Provided & Failed Verification or Be Anywhere Provided instad of PN (PN Provided initially & Failed Verification)", nil)
 
 			//If the slot is perceived as a phone number and passes verification
 			if PNCur != "" && alexa.VerifyPN(PNCur) {
@@ -169,7 +168,7 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 				//PN_Pass
 				options = OptionTemplates("PN_Pass", request, PNCur)
 
-				alexa.LogObject("Current Slot: PN & Passed Verification", nil)
+				LogTrace.StartConferenceDeviceIntentIntent.SessionAttributes.Previous_PN_VerifyFalse.Cur_PN.Verify = true
 
 				//If the slot is perceived as a BeAnywhere device OR the slot is perceived as a phone number but fails verification
 			} else {
@@ -177,7 +176,7 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 				//PN_Fail
 				options = OptionTemplates("PN_Fail", request, "")
 
-				alexa.LogObject("Current Slot: Be Anywhere / PN & Failed Verification", nil)
+				LogTrace.StartConferenceDeviceIntentIntent.SessionAttributes.Previous_PN_VerifyFalse.Cur_PN.Verify = false
 
 				//IN CASE OF ERROR: DO NOT copy over Session Attributes in this block
 				//Explicitly empty Session Attributes
@@ -187,17 +186,11 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 			//Previously, no slots were provided or an invalid request was made (e.g. both slots filled)
 		} else {
 
-			alexa.LogObject("Previous invocation: No Slots / Invalid Request", nil)
-
 			//One of the slots is filled
 			if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
 
-				alexa.LogObject("Current Slot: One Slot", nil)
-
 				//If a phone number is provided
 				if PNCur != "" {
-
-					alexa.LogObject("One Slot is PN", nil)
 
 					//If the phone number passed verification
 					if alexa.VerifyPN(PNCur) {
@@ -205,13 +198,15 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 						//PN_Pass
 						options = OptionTemplates("PN_Pass", request, PNCur)
 
+						LogTrace.StartConferenceDeviceIntentIntent.SessionAttributes.Previous_NoSlotsOrInvalid.Cur_OneSlot.PN.Verify = true
+
 						//If the phone number failed verification
 					} else {
 
 						//PN_Fail
 						options = OptionTemplates("PN_Fail", request, "")
 
-						alexa.LogObject("PN Failed Verification", nil)
+						LogTrace.StartConferenceDeviceIntentIntent.SessionAttributes.Previous_NoSlotsOrInvalid.Cur_OneSlot.PN.Verify = false
 
 					}
 
@@ -221,7 +216,7 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 					//BeAnywhere
 					options = OptionTemplates("BeAnywhere", request, BeAnywhereCur)
 
-					alexa.LogObject("One Slot is Be Anywhere", nil)
+					LogTrace.StartConferenceDeviceIntentIntent.SessionAttributes.Previous_NoSlotsOrInvalid.Cur_OneSlot.BeAnywhere = true
 
 				}
 
@@ -231,30 +226,34 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 				//Invalid
 				options = OptionTemplates("Invalid", request, "")
 
-				alexa.LogObject("Current Slot: Both Slots Provided / No Slots Provided", nil)
+				LogTrace.StartConferenceDeviceIntentIntent.SessionAttributes.Previous_NoSlotsOrInvalid.Cur_NoSlotsOrBothSlots = true
 
 			}
 
 		}
 
-		//If there are no session attributes or this intent was NOT invoked by the intent StartIntent
+		//If there are no session attributes or this intent was NOT invoked by the intent StartConferenceIntent
 	} else {
 
 		//Incorrect
 		options = OptionTemplates("Incorrect", request, "")
 
-		alexa.LogObject("StartDeviceIntent invocation: No Session Attributes / Not Invoked by StartIntent", nil)
+		LogTrace.StartConferenceDeviceIntentIntent.NoSessionAttributes = true
 
 	}
+
+	alexa.LogObject("Trace", LogTrace)
 
 	return alexa.BuildResponse(options)
 
 }
 
-func HandleStopIntent(request alexa.Request) alexa.Response {
+func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 
 	var options map[string]interface{}
 	options = make(map[string]interface{})
+
+	var LogTrace alexa.LogTrace
 
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
@@ -268,17 +267,23 @@ func HandleStopIntent(request alexa.Request) alexa.Response {
 		var cardContent = "Your conference was stopped on " + PNCur + ". "
 		options["cardContent"] = cardContent
 
+		LogTrace.StopConferenceIntent.PN = true
+
 	} else if BeAnywhereCur != "" {
 
 		var text = "Your conference was stopped on " + BeAnywhereCur + ". "
 		options["speechText"] = text
 		options["cardContent"] = text
 
+		LogTrace.StopConferenceIntent.BeAnywhere = true
+
 	} else {
 
 		var text = "Your conference was stopped. "
 		options["speechText"] = text
 		options["cardContent"] = text
+
+		LogTrace.StopConferenceIntent.NoSlots = true
 
 	}
 
@@ -289,9 +294,7 @@ func HandleStopIntent(request alexa.Request) alexa.Response {
 
 	options["endSession"] = true
 
-	if alexa.GetDebugOptions() {
-		alexa.LogObject("Options (StopIntent)", options)
-	}
+	alexa.LogObject("Trace", LogTrace)
 
 	return alexa.BuildResponse(options)
 
@@ -306,17 +309,15 @@ func IntentDispatcher(request alexa.Request) alexa.Response {
 	} else if request.Body.Type == "IntentRequest" {
 
 		switch request.Body.Intent.Name {
-		case "StartIntent":
-			response = HandleStartIntent(request)
-		case "StartDeviceIntent":
-			response = HandleStartDeviceIntent(request)
-		case "StopIntent":
-			response = HandleStopIntent(request)
+		case "StartConferenceIntent":
+			response = HandleStartConferenceIntent(request)
+		case "StartConferenceDeviceIntentIntent":
+			response = HandleStartConferenceDeviceIntentIntent(request)
+		case "StopConferenceIntent":
+			response = HandleStopConferenceIntent(request)
 		}
 
 	}
-
-	//alexa.ClearOptionsMap()
 
 	return response
 
@@ -372,7 +373,7 @@ func OptionTemplates(name string, request alexa.Request, deviceCur string) map[s
 		session := request.Session
 		var attributes map[string]interface{}
 		attributes = make(map[string]interface{})
-		attributes["startIntent"] = true
+		attributes["startConferenceIntent"] = true
 		attributes["isPN"] = true
 		session.Attributes = attributes
 		options["session"] = session
@@ -422,7 +423,7 @@ func OptionTemplates(name string, request alexa.Request, deviceCur string) map[s
 		session := request.Session
 		var attributes map[string]interface{}
 		attributes = make(map[string]interface{})
-		attributes["startIntent"] = true
+		attributes["startConferenceIntent"] = true
 		session.Attributes = attributes
 		options["session"] = session
 
@@ -459,7 +460,7 @@ func OptionTemplates(name string, request alexa.Request, deviceCur string) map[s
 		session := request.Session
 		var attributes map[string]interface{}
 		attributes = make(map[string]interface{})
-		attributes["startIntent"] = true
+		attributes["startConferenceIntent"] = true
 		session.Attributes = attributes
 		options["session"] = session
 
@@ -482,10 +483,6 @@ func OptionTemplates(name string, request alexa.Request, deviceCur string) map[s
 
 		options["endSession"] = true
 
-	}
-
-	if alexa.GetDebugOptions() {
-		alexa.LogObject("Options", options)
 	}
 
 	return options
