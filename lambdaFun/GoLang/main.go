@@ -87,11 +87,17 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 	//Only one slot is filled
 	if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
 
+		alexa.LogObject("StartIntent invoked: One Slot provided", nil)
+
 		//A phone number is provided
 		if PNCur != "" {
 
+			alexa.LogObject("Current Slot: PN", nil)
+
 			//The phone number passed verification
 			if alexa.VerifyPN(PNCur) {
+
+				alexa.LogObject("PN Passed Verification", nil)
 
 				var speechText = "Your conference was started on "
 				speechText += `<say-as interpret-as="telephone">` + PNCur + "</say-as>. "
@@ -109,6 +115,8 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 				//The phone number failed verification
 			} else {
+
+				alexa.LogObject("PN Failed Verification", nil)
 
 				var speechText = "Invalid phone number.  "
 				speechText += "Please provide a valid 10-digit phone number starting with the area code.  "
@@ -146,6 +154,8 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 			//A Be Anywhere device was provided
 		} else if BeAnywhereCur != "" {
 
+			alexa.LogObject("Current Slot: Be Anywhere", nil)
+
 			var speechText = "Your conference was started on " + BeAnywhereCur + ". "
 			options["speechText"] = speechText
 
@@ -163,6 +173,8 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 		//Both slots are empty
 	} else if PNCur == "" && BeAnywhereCur == "" {
+
+		alexa.LogObject("StartIntent invoked: Both Slots Empty", nil)
 
 		var speechText = "What device would you like to start your conference on? "
 		options["speechText"] = speechText
@@ -198,6 +210,8 @@ func HandleStartIntent(request alexa.Request) alexa.Response {
 
 		//Both slots are filled
 	} else {
+
+		alexa.LogObject("StartIntent invoked: Both Slots Filled", nil)
 
 		var speechText = "Invalid request.  "
 		speechText += "Please provide a valid phone number or Be Anywhere device.  "
@@ -255,6 +269,8 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 	//If session attributes exist and this intent was invoked by the intent StartIntent
 	if request.Session.Attributes != nil && request.Session.Attributes["startIntent"] == true {
 
+		alexa.LogObject("StartDeviceIntent invoked: Session Attributes Exist, Invoked by StartIntent", nil)
+
 		slots := request.Body.Intent.Slots
 		PNCur := slots["PN"].Value
 		BeAnywhereCur := slots["BeAnywhere"].Value
@@ -262,8 +278,12 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 		//Previously, a phone number was provided alongside the intent StartIntent and failed verification
 		if _, ok := request.Session.Attributes["isPN"]; ok {
 
+			alexa.LogObject("Previous invocation: PN Provided & Failed Verification or Be Anywhere Provided instad of PN (PN Provided initially & Failed Verification)", nil)
+
 			//If the slot is perceived as a phone number and passes verification
 			if PNCur != "" && alexa.VerifyPN(PNCur) {
+
+				alexa.LogObject("Current Slot: PN & Passed Verification", nil)
 
 				var speechText = "Your conference was started on "
 				speechText += `<say-as interpret-as="telephone">` + PNCur + "</say-as>. "
@@ -281,6 +301,8 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 
 				//If the slot is perceived as a BeAnywhere device OR the slot is perceived as a phone number but fails verification
 			} else {
+
+				alexa.LogObject("Current Slot: Be Anywhere / PN & Failed Verification", nil)
 
 				var speechText = "Invalid phone number.  "
 				speechText += "Please provide a valid 10-digit phone number starting with the area code.  "
@@ -310,14 +332,22 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 			//Previously, no slots were provided or an invalid request was made (e.g. both slots filled)
 		} else {
 
+			alexa.LogObject("Previous invocation: No Slots / Invalid Request", nil)
+
 			//One of the slots is filled
 			if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
+
+				alexa.LogObject("Current Slot: One Slot", nil)
 
 				//If a phone number is provided
 				if PNCur != "" {
 
+					alexa.LogObject("One Slot is PN", nil)
+
 					//If the phone number passed verification
 					if alexa.VerifyPN(PNCur) {
+
+						alexa.LogObject("PN Passed Verification", nil)
 
 						var speechText = "Your conference was started on "
 						speechText += `<say-as interpret-as="telephone">` + PNCur + "</say-as>. "
@@ -335,6 +365,8 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 
 						//If the phone number failed verification
 					} else {
+
+						alexa.LogObject("PN Failed Verification", nil)
 
 						var speechText = "Invalid phone number.  "
 						speechText += "Please provide a valid 10-digit phone number starting with the area code.  "
@@ -357,12 +389,23 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 						var cardTitle = "ERROR: Audio Conference Start"
 						options["cardTitle"] = cardTitle
 
+						//isPN = true
+						session := request.Session
+						var attributes map[string]interface{}
+						attributes = make(map[string]interface{})
+						attributes["startIntent"] = true
+						attributes["isPN"] = true
+						session.Attributes = attributes
+						options["session"] = session
+
 						options["endSession"] = false
 
 					}
 
 					//If a Be Anywhere device is provided
 				} else if BeAnywhereCur != "" {
+
+					alexa.LogObject("One Slot is Be Anywhere", nil)
 
 					var speechText = "Your conference was started on " + BeAnywhereCur + ". "
 					options["speechText"] = speechText
@@ -381,6 +424,8 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 
 				//Both slots are either empty or filled
 			} else {
+
+				alexa.LogObject("Current Slot: Both Slots Provided / No Slots Provided", nil)
 
 				var speechText = "Invalid request.  "
 				speechText += "Please provide a valid phone number or Be Anywhere device.  "
@@ -425,17 +470,11 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 		//If there are no session attributes or this intent was NOT invoked by the intent StartIntent
 	} else {
 
+		alexa.LogObject("StartDeviceIntent invocation: No Session Attributes / Not Invoked by StartIntent", nil)
+
 		var speechText = "Incorrect usage.  "
 		speechText += "To start a conference, please provide a valid phone number or Be Anywhere device. "
-		speechText += "What device would you like to start your conference on? "
 		options["speechText"] = speechText
-
-		var repromptText = "You can say a phone number, such as "
-		repromptText += `<say-as interpret-as="telephone">2155551234</say-as>`
-		repromptText += ", or "
-		repromptText += "say a Be Anywhere device, such as "
-		repromptText += "My Cell. "
-		options["repromptText"] = repromptText
 
 		var cardContent = "Incorrect usage.  "
 		cardContent += "To start a conference, please provide a valid phone number or Be Anywhere device."
@@ -446,7 +485,7 @@ func HandleStartDeviceIntent(request alexa.Request) alexa.Response {
 		var cardTitle = "ERROR: Audio Conference Start"
 		options["cardTitle"] = cardTitle
 
-		options["endSession"] = false
+		options["endSession"] = true
 
 	}
 
@@ -523,6 +562,19 @@ func IntentDispatcher(request alexa.Request) alexa.Response {
 
 	}
 
+	//alexa.ClearOptionsMap()
+
 	return response
 
 }
+
+/*
+func OptionTemplates(name string) {
+
+	switch name {
+	case "launch":
+		case ""
+	}
+
+}
+*/

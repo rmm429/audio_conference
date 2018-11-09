@@ -10,6 +10,8 @@ var debugGo = false
 var debugUserInfo = false
 var debugOptions = false
 
+//var options map[string]interface{}
+
 type CardImg struct {
 	Small string
 	Large string
@@ -96,11 +98,17 @@ func GetQuestionImg() CardImg {
 
 func LogObject(identifier string, obj interface{}) {
 
-	o, err := json.Marshal(obj)
-	if err != nil {
-		log.Print("\r" + identifier + ":\r" + "ERROR: could not convert object to JSON")
+	if obj != nil {
+
+		o, err := json.Marshal(obj)
+		if err != nil {
+			log.Print("\r" + identifier + ":\r" + "ERROR: could not convert object to JSON")
+		} else {
+			log.Print("\r" + identifier + ":\r" + string(o))
+		}
+
 	} else {
-		log.Print("\r" + identifier + ":\r" + string(o))
+		log.Print("\r" + identifier)
 	}
 
 }
@@ -144,3 +152,14 @@ func FormatPN(PN string) string {
 	return PNFormatted
 
 }
+
+/*
+func BuildOptions(key string, val interface{}) map[string]interface{} {
+
+
+}
+
+func ClearOptionsMap() {
+	options = make(map[string]interface{})
+}
+*/
