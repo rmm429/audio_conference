@@ -16,50 +16,50 @@ type CardImg struct {
 }
 
 type LogTrace struct {
-	LaunchRequest                     bool                              `json:"LaunchRequest,omitempty"`
-	StartConferenceIntent             StartConferenceIntent             `json:"StartConferenceIntent,omitempty"`
-	StartConferenceDeviceIntentIntent StartConferenceDeviceIntentIntent `json:"StartConferenceDeviceIntentIntent,omitempty"`
-	StopConferenceIntent              StopConferenceIntent              `json:"StopConferenceIntent,omitempty"`
+	LaunchRequest               string      `json:"LaunchRequest,omitempty"`
+	StartConferenceIntent       interface{} `json:"StartConferenceIntent,omitempty"`
+	StartConferenceDeviceIntent interface{} `json:"StartConferenceDeviceIntent,omitempty"`
+	StopConferenceIntent        interface{} `json:"StopConferenceIntent,omitempty"`
 }
 
 type StartConferenceIntent struct {
-	OneSlot   OneSlot `json:"OneSlot,omitempty"`
-	NoSlots   bool    `json:"NoSlots,omitempty"`
-	BothSlots bool    `json:"BothSlots,omitempty"`
+	OneSlot   interface{} `json:"OneSlot,omitempty"`
+	NoSlots   string      `json:"NoSlots,omitempty"`
+	BothSlots string      `json:"BothSlots,omitempty"`
 }
 
 type OneSlot struct {
-	PN         PN   `json:"PN,omitempty"`
-	BeAnywhere bool `json:"BeAnywhere,omitempty"`
+	PN         interface{} `json:"PN,omitempty"`
+	BeAnywhere string      `json:"BeAnywhere,omitempty"`
 }
 
 type PN struct {
-	Verify bool `json:"Verify,omitempty"`
+	Verify string `json:"Verify,omitempty"`
 }
 
-type StartConferenceDeviceIntentIntent struct {
-	SessionAttributes   SessionAttributes `json:"SessionAttributes,omitempty"`
-	NoSessionAttributes bool              `json:"NoSessionAttributes,omitempty"`
+type StartConferenceDeviceIntent struct {
+	SessionAttributes   interface{} `json:"SessionAttributes,omitempty"`
+	NoSessionAttributes string      `json:"NoSessionAttributes,omitempty"`
 }
 
 type SessionAttributes struct {
-	Previous_PN_VerifyFalse   Previous_PN_VerifyFalse   `json:"Previous_PN_VerifyFalse,omitempty"`
-	Previous_NoSlotsOrInvalid Previous_NoSlotsOrInvalid `json:"Previous_NoSlotsOrInvalid,omitempty"`
+	Previous_PN_VerifyFalse   interface{} `json:"Previous_PN_VerifyFalse,omitempty"`
+	Previous_NoSlotsOrInvalid interface{} `json:"Previous_NoSlotsOrInvalid,omitempty"`
 }
 
 type Previous_PN_VerifyFalse struct {
-	Cur_PN PN `json:"Cur_Device,omitempty"`
+	Cur_PN interface{} `json:"Cur_Device,omitempty"`
 }
 
 type Previous_NoSlotsOrInvalid struct {
-	Cur_OneSlot            OneSlot `json:"Cur_OneSlot,omitempty"`
-	Cur_NoSlotsOrBothSlots bool    `json:"Cur_NoSlotsOrBothSlots,omitempty"`
+	Cur_OneSlot            interface{} `json:"Cur_OneSlot,omitempty"`
+	Cur_NoSlotsOrBothSlots string      `json:"Cur_NoSlotsOrBothSlots,omitempty"`
 }
 
 type StopConferenceIntent struct {
-	PN         bool `json:"PN,omitempty"`
-	BeAnywhere bool `json:"BeAnywhere,omitempty"`
-	NoSlots    bool `json:"NoSlots,omitempty"`
+	PN         string `json:"PN,omitempty"`
+	BeAnywhere string `json:"BeAnywhere,omitempty"`
+	NoSlots    string `json:"NoSlots,omitempty"`
 }
 
 //<a href="https://www.iconfinder.com/icons/309047/conference_group_people_users_icon" target="_blank">"Conference, group, people, users icon"</a> by <a href="https://www.iconfinder.com/visualpharm" target="_blank">Ivan Boyko</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>
