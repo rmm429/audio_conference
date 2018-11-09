@@ -337,7 +337,7 @@ func OptionTemplates(name string, request alexa.Request, deviceCur string) map[s
 		speechText += `<say-as interpret-as="telephone">` + deviceCur + "</say-as>. "
 		options["speechText"] = speechText
 
-		var cardContent = "Your conference was started on " + deviceCur + ". "
+		var cardContent = "Your conference was started on " + alexa.FormatPN(deviceCur) + ". "
 		options["cardContent"] = cardContent
 
 		options["imageObj"] = alexa.GetPhoneStartImg()

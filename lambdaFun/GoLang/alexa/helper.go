@@ -141,7 +141,7 @@ func FormatPN(PN string) string {
 
 		var areaCode = string(runes[0:3])
 		var middle = string(runes[3:6])
-		var end = string(runes[6])
+		var end = string(runes[6:10])
 
 		PNFormatted = "(" + areaCode + ") " + middle + "-" + end
 
@@ -152,13 +152,3 @@ func FormatPN(PN string) string {
 	return PNFormatted
 
 }
-
-/*
-func BuildOptions(key string, val interface{}) map[string]interface{} {
-
-}
-
-func ClearOptionsMap() {
-	options = make(map[string]interface{})
-}
-*/
