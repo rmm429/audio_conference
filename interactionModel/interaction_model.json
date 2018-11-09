@@ -24,7 +24,7 @@
                     "samples": []
                 },
                 {
-                    "name": "StartIntent",
+                    "name": "StartConferenceIntent",
                     "slots": [
                         {
                             "name": "PN",
@@ -41,7 +41,24 @@
                     ]
                 },
                 {
-                    "name": "StopIntent",
+                    "name": "StartConferenceDeviceIntent",
+                    "slots": [
+                        {
+                            "name": "PN",
+                            "type": "AMAZON.PhoneNumber"
+                        },
+                        {
+                            "name": "BeAnywhere",
+                            "type": "BeAnywhere"
+                        }
+                    ],
+                    "samples": [
+                        "{BeAnywhere}",
+                        "{PN}"
+                    ]
+                },
+                {
+                    "name": "StopConferenceIntent",
                     "slots": [
                         {
                             "name": "PN",
@@ -63,6 +80,16 @@
                 {
                     "name": "BeAnywhere",
                     "values": [
+                        {
+                            "name": {
+                                "value": "iPhone"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "i phone"
+                            }
+                        },
                         {
                             "name": {
                                 "value": "mobile"

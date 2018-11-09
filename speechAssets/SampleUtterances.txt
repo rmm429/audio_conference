@@ -1,6 +1,9 @@
-StartIntent start a conference on {PN}
-StartIntent start a conference on {BeAnywhere}
+StartConferenceIntent start a conference on {PN}
+StartConferenceIntent start a conference on {BeAnywhere}
 
-StopIntent stop the conference on {PN}
-StopIntent stop the conference on {BeAnywhere}
-StopIntent stop the conference
+StartConferenceDeviceIntent {PN}
+StartConferenceDeviceIntent {BeAnywhere}
+
+StopConferenceIntent stop the conference on {PN}
+StopConferenceIntent stop the conference on {BeAnywhere}
+StopConferenceIntent stop the conference

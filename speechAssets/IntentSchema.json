@@ -1,7 +1,7 @@
 {
   "intents": [
     {
-      "intent": "StartIntent",
+      "intent": "StartConferenceIntent",
       "slots": [
           {
               "name": "PN",
@@ -14,7 +14,20 @@
       ]
     },
     {
-      "intent": "StopIntent",
+        "intent": "StartConferenceDeviceIntent",
+        "slots": [
+            {
+                "name": "PN",
+                "type": "AMAZON.PhoneNumber"
+            },
+            {
+                "name": "BeAnywhere",
+                "type": "BeAnywhere"
+            }
+        ]
+    },
+    {
+      "intent": "StopConferenceIntent",
       "slots": [
           {
               "name": "PN",
