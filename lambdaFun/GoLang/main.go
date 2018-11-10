@@ -49,6 +49,7 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 	var LogTrace = `LaunchRequest has been invoked`
 
 	var speechText = "Welcome to the Audio Conference skill.  "
+	speechText += "You can start a conference on a phone number or Be Anywhere device.  "
 	speechText += "You can say, for example, "
 	speechText += "ask audio conference to start a conference on "
 	speechText += `<say-as interpret-as="telephone">2155551234</say-as>`
@@ -57,6 +58,7 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 	options["speechText"] = speechText
 
 	var cardContent = "Welcome to the Audio Conference skill.  "
+	cardContent += "You can start a conference on a phone number or Be Anywhere device.  "
 	cardContent += "You can say, for example, "
 	cardContent += `'ask audio conference to start a conference on (215) 555-1234'`
 	cardContent += ", or, "
@@ -69,14 +71,6 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 	options["cardTitle"] = cardTitle
 
 	options["endSession"] = true
-
-	/*
-		LogTrace = alexa.LogTrace{
-			LaunchRequest: "success",
-		}
-
-		alexa.LogObject("Trace", LogTrace)
-	*/
 
 	alexa.LogObject("Trace", LogTrace)
 
@@ -113,42 +107,22 @@ func HandleStartConferenceIntent(request alexa.Request) alexa.Response {
 
 				LogTrace += "\r               "
 				LogTrace += "The phone number has passed verification"
+				LogTrace += "\r                    "
+				LogTrace += "Phone number: " + PNCur
 
 				//PN_Pass
 				options = OptionTemplates("PN_Pass", request, PNCur)
-
-				/*
-					LogTrace = alexa.LogTrace{
-						StartConferenceIntent: alexa.StartConferenceIntent{
-							OneSlot: alexa.OneSlot{
-								PN: alexa.PN{
-									Verify: "valid",
-								},
-							},
-						},
-					}
-				*/
 
 				//The phone number failed verification
 			} else {
 
 				LogTrace += "\r               "
 				LogTrace += "The phone number has failed verification"
+				LogTrace += "\r                    "
+				LogTrace += "Heard phone number: " + PNCur
 
 				//PN_Fail
 				options = OptionTemplates("PN_Fail", request, "")
-
-				/*
-					LogTrace = alexa.LogTrace{
-						StartConferenceIntent: alexa.StartConferenceIntent{
-							OneSlot: alexa.OneSlot{
-								PN: alexa.PN{
-									Verify: "invalid",
-								},
-							},
-						},
-					}
-				*/
 
 			}
 
@@ -157,19 +131,11 @@ func HandleStartConferenceIntent(request alexa.Request) alexa.Response {
 
 			LogTrace += "\r          "
 			LogTrace += "A Be Anywhere device has been provided"
+			LogTrace += "\r               "
+			LogTrace += "Be Anywhere device: " + BeAnywhereCur
 
 			//BeAnywhere
 			options = OptionTemplates("BeAnywhere", request, BeAnywhereCur)
-
-			/*
-				LogTrace = alexa.LogTrace{
-					StartConferenceIntent: alexa.StartConferenceIntent{
-						OneSlot: alexa.OneSlot{
-							BeAnywhere: "yes",
-						},
-					},
-				}
-			*/
 
 		}
 
@@ -182,30 +148,18 @@ func HandleStartConferenceIntent(request alexa.Request) alexa.Response {
 		//Start_BothEmpty
 		options = OptionTemplates("Start_BothEmpty", request, "")
 
-		/*
-			LogTrace = alexa.LogTrace{
-				StartConferenceIntent: alexa.StartConferenceIntent{
-					NoSlots: "yes",
-				},
-			}
-		*/
-
-		//Both slots are filled
+		//Both slots are filled (RARE CASE)
 	} else {
 
 		LogTrace += "\r     "
 		LogTrace += "Both slots have been filled"
+		LogTrace += "\r          "
+		LogTrace += "Heard phone number: " + PNCur
+		LogTrace += "\r          "
+		LogTrace += "Heard Be Anywhere device: " + BeAnywhereCur
 
 		//Invalid
 		options = OptionTemplates("Invalid", request, "")
-
-		/*
-			LogTrace = alexa.LogTrace{
-				StartConferenceIntent: alexa.StartConferenceIntent{
-					BothSlots: "yes",
-				},
-			}
-		*/
 
 	}
 
@@ -244,23 +198,11 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 
 				LogTrace += "\r               "
 				LogTrace += "In the current request, the phone number has passed verification"
+				LogTrace += "\r                    "
+				LogTrace += "Phone number: " + PNCur
 
 				//PN_Pass
 				options = OptionTemplates("PN_Pass", request, PNCur)
-
-				/*
-					LogTrace = alexa.LogTrace{
-						StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-							SessionAttributes: alexa.SessionAttributes{
-								Previous_PN_VerifyFalse: alexa.Previous_PN_VerifyFalse{
-									Cur_PN: alexa.PN{
-										Verify: "valid",
-									},
-								},
-							},
-						},
-					}
-				*/
 
 				//If the slot is perceived as a Be Anywhere device OR the slot is perceived as a phone number but fails verification
 			} else {
@@ -268,22 +210,15 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 				LogTrace += "\r               "
 				LogTrace += "In the current request, the phone number has failed verificaiton"
 
+				LogTrace += "\r                    "
+				if PNCur != "" {
+					LogTrace += "Heard phone number: " + PNCur
+				} else {
+					LogTrace += "Heard phone number: " + BeAnywhereCur
+				}
+
 				//PN_Fail
 				options = OptionTemplates("PN_Fail", request, "")
-
-				/*
-					LogTrace = alexa.LogTrace{
-						StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-							SessionAttributes: alexa.SessionAttributes{
-								Previous_PN_VerifyFalse: alexa.Previous_PN_VerifyFalse{
-									Cur_PN: alexa.PN{
-										Verify: "invalid",
-									},
-								},
-							},
-						},
-					}
-				*/
 
 				//IN CASE OF ERROR: DO NOT copy over Session Attributes in this block
 				//Explicitly empty Session Attributes
@@ -313,50 +248,22 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 
 						LogTrace += "\r                         "
 						LogTrace += "The phone number has passed verification"
+						LogTrace += "\r                              "
+						LogTrace += "Phone number: " + PNCur
 
 						//PN_Pass
 						options = OptionTemplates("PN_Pass", request, PNCur)
-
-						/*
-							LogTrace = alexa.LogTrace{
-								StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-									SessionAttributes: alexa.SessionAttributes{
-										Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
-											Cur_OneSlot: alexa.OneSlot{
-												PN: alexa.PN{
-													Verify: "valid",
-												},
-											},
-										},
-									},
-								},
-							}
-						*/
 
 						//If the phone number failed verification
 					} else {
 
 						LogTrace += "\r                         "
 						LogTrace += "The phone number has failed verification"
+						LogTrace += "\r                              "
+						LogTrace += "Heard phone number: " + PNCur
 
 						//PN_Fail
 						options = OptionTemplates("PN_Fail", request, "")
-
-						/*
-							LogTrace = alexa.LogTrace{
-								StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-									SessionAttributes: alexa.SessionAttributes{
-										Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
-											Cur_OneSlot: alexa.OneSlot{
-												PN: alexa.PN{
-													Verify: "invalid",
-												},
-											},
-										},
-									},
-								},
-							}
-						*/
 
 					}
 
@@ -364,68 +271,40 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 				} else if BeAnywhereCur != "" {
 
 					LogTrace += "\r                    "
-					LogTrace += "A BeAnywhere device has been provided"
+					LogTrace += "A Be Anywhere device has been provided"
+					LogTrace += "\r                         "
+					LogTrace += "Be Anywhere device: " + BeAnywhereCur
 
 					//BeAnywhere
 					options = OptionTemplates("BeAnywhere", request, BeAnywhereCur)
 
-					/*
-						LogTrace = alexa.LogTrace{
-							StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-								SessionAttributes: alexa.SessionAttributes{
-									Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
-										Cur_OneSlot: alexa.OneSlot{
-											BeAnywhere: "yes",
-										},
-									},
-								},
-							},
-						}
-					*/
-
 				}
 
-				//Both slots are either empty or filled
+				//Both slots are either empty or filled (RARE CASE)
 			} else {
 
 				LogTrace += "\r               "
 				LogTrace += "In the current request, neither slot has been filled or both slots have been filled"
+				LogTrace += "\r                    "
+				LogTrace += "Heard phone number: " + PNCur
+				LogTrace += "\r                    "
+				LogTrace += "Heard Be Anywhere device: " + BeAnywhereCur
 
 				//Invalid
 				options = OptionTemplates("Invalid", request, "")
-
-				/*
-					LogTrace = alexa.LogTrace{
-						StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-							SessionAttributes: alexa.SessionAttributes{
-								Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
-									Cur_NoSlotsOrBothSlots: "yes",
-								},
-							},
-						},
-					}
-				*/
 
 			}
 
 		}
 
-		//If there are no session attributes or this intent was NOT invoked by the intent StartConferenceIntent
+		//If there are no session attributes, this intent was NOT invoked by the intent StartConferenceIntent, or an invalid request has been made
 	} else {
 
 		LogTrace += "\r     "
-		LogTrace += "In the current request, there are either no session attributes or this intent was not invoked by StartConferenceIntent"
+		LogTrace += "In the current request, there are either no session attributes, this intent was not invoked by StartConferenceIntent, or an invalid request has been made"
 
 		//Incorrect
 		options = OptionTemplates("Incorrect", request, "")
-
-		/*
-			LogTrace = alexa.LogTrace{
-				StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-					NoSessionAttributes: "yes",
-				},
-			}
-		*/
 
 	}
 
@@ -452,6 +331,8 @@ func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 
 		LogTrace += "\r     "
 		LogTrace += "A phone number has been provided as a slot"
+		LogTrace += "\r          "
+		LogTrace += "Phone number: " + PNCur
 
 		var speechText = `Your conference was stopped on <say-as interpret-as="telephone">` + PNCur + "</say-as>. "
 		options["speechText"] = speechText
@@ -459,12 +340,16 @@ func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 		var cardContent = "Your conference was stopped on " + PNCur + ". "
 		options["cardContent"] = cardContent
 
-		/*
-			LogTrace = alexa.LogTrace{
-				StopConferenceIntent: alexa.StopConferenceIntent{
-					PN: "yes",
-				},
-			}
+		/* DO THIS ON MONDAY!!!
+		if (alexa.VerifyPN(PNCur)) {
+
+
+
+		} else {
+
+
+
+		}
 		*/
 
 		//A Be Anywhere device has been provided as a slot
@@ -472,18 +357,12 @@ func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 
 		LogTrace += "\r     "
 		LogTrace += "A Be Anywhere device has been provided as a slot"
+		LogTrace += "\r          "
+		LogTrace += "Be Anywhere: " + BeAnywhereCur
 
 		var text = "Your conference was stopped on " + BeAnywhereCur + ". "
 		options["speechText"] = text
 		options["cardContent"] = text
-
-		/*
-			LogTrace = alexa.LogTrace{
-				StopConferenceIntent: alexa.StopConferenceIntent{
-					BeAnywhere: "yes",
-				},
-			}
-		*/
 
 		//Neither slot was filled
 	} else {
@@ -494,14 +373,6 @@ func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 		var text = "Your conference was stopped. "
 		options["speechText"] = text
 		options["cardContent"] = text
-
-		/*
-			LogTrace = alexa.LogTrace{
-				StopConferenceIntent: alexa.StopConferenceIntent{
-					NoSlots: "yes",
-				},
-			}
-		*/
 
 	}
 
@@ -575,6 +446,7 @@ func OptionTemplates(name string, request alexa.Request, deviceCur string) map[s
 
 		var repromptText = "For example, you could say "
 		repromptText += `<say-as interpret-as="telephone">2155551234</say-as>. `
+		repromptText += "What phone number would you like to start your conference on? "
 		options["repromptText"] = repromptText
 
 		var cardContent = "Invalid phone number.  "
@@ -659,6 +531,7 @@ func OptionTemplates(name string, request alexa.Request, deviceCur string) map[s
 		repromptText += ", or "
 		repromptText += "say a Be Anywhere device, such as "
 		repromptText += "My Cell. "
+		repromptText += "What device would you like to start your conference on? "
 		options["repromptText"] = repromptText
 
 		var cardContent = "Invalid request.  "
@@ -687,11 +560,20 @@ func OptionTemplates(name string, request alexa.Request, deviceCur string) map[s
 	case "Incorrect":
 
 		var speechText = "Incorrect usage.  "
-		speechText += "To start a conference, please provide a valid phone number or Be Anywhere device. "
+		speechText += "To start a conference, please provide a valid phone number or Be Anywhere device.  "
+		speechText += "You can say, for example, "
+		speechText += "ask audio conference to start a conference on "
+		speechText += `<say-as interpret-as="telephone">2155551234</say-as>`
+		speechText += ", or, "
+		speechText += "ask audio conference to start a conference on My Cell. "
 		options["speechText"] = speechText
 
 		var cardContent = "Incorrect usage.  "
-		cardContent += "To start a conference, please provide a valid phone number or Be Anywhere device."
+		cardContent += "To start a conference, please provide a valid phone number or Be Anywhere device.  "
+		cardContent += "You can say, for example, "
+		cardContent += `'ask audio conference to start a conference on (215) 555-1234'`
+		cardContent += ", or, "
+		cardContent += `'ask audio conference to start a conference on My Cell'.`
 		options["cardContent"] = cardContent
 
 		options["imageObj"] = alexa.GetPhoneErrorImg()
