@@ -33,9 +33,24 @@
                         {
                             "name": "BeAnywhere",
                             "type": "BeAnywhere"
+                        },
+                        {
+                            "name": "Num",
+                            "type": "AMAZON.NUMBER"
+                        },
+                        {
+                            "name": "NumCheck",
+                            "type": "NumCheck"
+                        },
+                        {
+                            "name": "Ordinal",
+                            "type": "AMAZON.Ordinal"
                         }
                     ],
                     "samples": [
+                        "start a conference on {Ordinal} {BeAnywhere}",
+                        "start a conference on {BeAnywhere} {NumCheck}",
+                        "start a conference on {BeAnywhere} {Num}",
                         "start a conference on {BeAnywhere}",
                         "start a conference on {PN}"
                     ]
@@ -50,9 +65,24 @@
                         {
                             "name": "BeAnywhere",
                             "type": "BeAnywhere"
+                        },
+                        {
+                            "name": "Num",
+                            "type": "AMAZON.NUMBER"
+                        },
+                        {
+                            "name": "NumCheck",
+                            "type": "NumCheck"
+                        },
+                        {
+                            "name": "Ordinal",
+                            "type": "AMAZON.Ordinal"
                         }
                     ],
                     "samples": [
+                        "{Ordinal} {BeAnywhere}",
+                        "{BeAnywhere} {NumCheck}",
+                        "{BeAnywhere} {Num}",
                         "{BeAnywhere}",
                         "{PN}"
                     ]
@@ -67,12 +97,27 @@
                         {
                             "name": "BeAnywhere",
                             "type": "BeAnywhere"
+                        },
+                        {
+                            "name": "Num",
+                            "type": "AMAZON.NUMBER"
+                        },
+                        {
+                            "name": "NumCheck",
+                            "type": "NumCheck"
+                        },
+                        {
+                            "name": "Ordinal",
+                            "type": "AMAZON.Ordinal"
                         }
                     ],
                     "samples": [
-                        "stop the conference",
+                        "stop the conference on {Ordinal} {BeAnywhere}",
+                        "stop the conference on {BeAnywhere} {NumCheck}",
+                        "stop the conference on {BeAnywhere} {Num}",
                         "stop the conference on {BeAnywhere}",
-                        "stop the conference on {PN}"
+                        "stop the conference on {PN}",
+                        "stop the conference"
                     ]
                 }
             ],
@@ -80,6 +125,21 @@
                 {
                     "name": "BeAnywhere",
                     "values": [
+                        {
+                            "name": {
+                                "value": "sell"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "sale"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "cell"
+                            }
+                        },
                         {
                             "name": {
                                 "value": "iPhone"
@@ -98,6 +158,21 @@
                         {
                             "name": {
                                 "value": "my cell"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "NumCheck",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "too"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "to"
                             }
                         }
                     ]

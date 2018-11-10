@@ -1,9 +1,18 @@
 StartConferenceIntent start a conference on {PN}
 StartConferenceIntent start a conference on {BeAnywhere}
+StartConferenceIntent start a conference on {BeAnywhere} {Num}
+StartConferenceIntent start a conference on {BeAnywhere} {NumCheck}
+StartConferenceIntent start a conference on {Ordinal} {BeAnywhere}
 
 StartConferenceDeviceIntent {PN}
 StartConferenceDeviceIntent {BeAnywhere}
+StartConferenceDeviceIntent {BeAnywhere} {Num}
+StartConferenceDeviceIntent {BeAnywhere} {NumCheck}
+StartConferenceDeviceIntent {Ordinal} {BeAnywhere}
 
+StopConferenceIntent stop the conference
 StopConferenceIntent stop the conference on {PN}
 StopConferenceIntent stop the conference on {BeAnywhere}
-StopConferenceIntent stop the conference
+StopConferenceIntent stop the conference on {BeAnywhere} {Num}
+StopConferenceIntent stop the conference on {BeAnywhere} {NumCheck}
+StopConferenceIntent stop the conference on {Ordinal} {BeAnywhere}

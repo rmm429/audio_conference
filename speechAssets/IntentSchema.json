@@ -10,6 +10,18 @@
           {
               "name": "BeAnywhere",
               "type": "BeAnywhere"
+          },
+          {
+              "name": "Num",
+              "type": "AMAZON.NUMBER"
+          },
+          {
+              "name": "NumCheck",
+              "type": "NumCheck"
+          },
+          {
+              "name": "Ordinal",
+              "type": "AMAZON.Ordinal"
           }
       ]
     },
@@ -23,7 +35,20 @@
             {
                 "name": "BeAnywhere",
                 "type": "BeAnywhere"
-            }
+            },
+            {
+              "name": "Num",
+              "type": "AMAZON.NUMBER"
+          },
+          {
+              "name": "NumCheck",
+              "type": "NumCheck"
+          },
+          {
+              "name": "Ordinal",
+              "type": "AMAZON.Ordinal"
+          }
+
         ]
     },
     {
@@ -36,6 +61,18 @@
           {
               "name": "BeAnywhere",
               "type": "BeAnywhere"
+          },
+          {
+              "name": "Num",
+              "type": "AMAZON.NUMBER"
+          },
+          {
+              "name": "NumCheck",
+              "type": "NumCheck"
+          },
+          {
+              "name": "Ordinal",
+              "type": "AMAZON.Ordinal"
           }
       ]
     }

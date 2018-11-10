@@ -89,6 +89,21 @@ func HandleStartConferenceIntent(request alexa.Request) alexa.Response {
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
 	BeAnywhereCur := slots["BeAnywhere"].Value
+	NumCur := slots["Num"].Value
+	NumCheckCur := slots["NumCheck"].Value
+	OrdinalCur := slots["Ordinal"].Value
+
+	//Accuracy editing
+	BeAnywhereCur = alexa.BeAnywhereHomomyn(BeAnywhereCur)
+
+	//Accuracy editing
+	if NumCur != "" {
+		BeAnywhereCur = alexa.BeAnywhereNum(BeAnywhereCur, NumCur)
+	} else if NumCheckCur != "" {
+		BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
+	} else if OrdinalCur != "" {
+		BeAnywhereCur = alexa.BeAnywhereOrdinal(BeAnywhereCur, OrdinalCur)
+	}
 
 	//Only one slot is filled
 	if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
@@ -186,6 +201,21 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 		slots := request.Body.Intent.Slots
 		PNCur := slots["PN"].Value
 		BeAnywhereCur := slots["BeAnywhere"].Value
+		NumCur := slots["Num"].Value
+		NumCheckCur := slots["NumCheck"].Value
+		OrdinalCur := slots["Ordinal"].Value
+
+		//Accuracy editing
+		BeAnywhereCur = alexa.BeAnywhereHomomyn(BeAnywhereCur)
+
+		//Accuracy editing
+		if NumCur != "" {
+			BeAnywhereCur = alexa.BeAnywhereNum(BeAnywhereCur, NumCur)
+		} else if NumCheckCur != "" {
+			BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
+		} else if OrdinalCur != "" {
+			BeAnywhereCur = alexa.BeAnywhereOrdinal(BeAnywhereCur, OrdinalCur)
+		}
 
 		//Previously, a phone number was provided alongside the intent StartConferenceIntent and failed verification
 		if _, ok := request.Session.Attributes["isPN"]; ok {
@@ -325,6 +355,21 @@ func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
 	BeAnywhereCur := slots["BeAnywhere"].Value
+	NumCur := slots["Num"].Value
+	NumCheckCur := slots["NumCheck"].Value
+	OrdinalCur := slots["Ordinal"].Value
+
+	//Accuracy editing
+	BeAnywhereCur = alexa.BeAnywhereHomomyn(BeAnywhereCur)
+
+	//Accuracy editing
+	if NumCur != "" {
+		BeAnywhereCur = alexa.BeAnywhereNum(BeAnywhereCur, NumCur)
+	} else if NumCheckCur != "" {
+		BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
+	} else if OrdinalCur != "" {
+		BeAnywhereCur = alexa.BeAnywhereOrdinal(BeAnywhereCur, OrdinalCur)
+	}
 
 	//A phone number was provided as a slot
 	if PNCur != "" {

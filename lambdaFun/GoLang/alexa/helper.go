@@ -17,55 +17,6 @@ type CardImg struct {
 	Large string
 }
 
-/*
-type LogTrace struct {
-	LaunchRequest               string      `json:"LaunchRequest,omitempty"`
-	StartConferenceIntent       interface{} `json:"StartConferenceIntent,omitempty"`
-	StartConferenceDeviceIntent interface{} `json:"StartConferenceDeviceIntent,omitempty"`
-	StopConferenceIntent        interface{} `json:"StopConferenceIntent,omitempty"`
-}
-
-type StartConferenceIntent struct {
-	OneSlot   interface{} `json:"OneSlot,omitempty"`
-	NoSlots   string      `json:"NoSlots,omitempty"`
-	BothSlots string      `json:"BothSlots,omitempty"`
-}
-
-type OneSlot struct {
-	PN         interface{} `json:"PN,omitempty"`
-	BeAnywhere string      `json:"BeAnywhere,omitempty"`
-}
-
-type PN struct {
-	Verify string `json:"Verify,omitempty"`
-}
-
-type StartConferenceDeviceIntent struct {
-	SessionAttributes   interface{} `json:"SessionAttributes,omitempty"`
-	NoSessionAttributes string      `json:"NoSessionAttributes,omitempty"`
-}
-
-type SessionAttributes struct {
-	Previous_PN_VerifyFalse   interface{} `json:"Previous_PN_VerifyFalse,omitempty"`
-	Previous_NoSlotsOrInvalid interface{} `json:"Previous_NoSlotsOrInvalid,omitempty"`
-}
-
-type Previous_PN_VerifyFalse struct {
-	Cur_PN interface{} `json:"Cur_PN,omitempty"`
-}
-
-type Previous_NoSlotsOrInvalid struct {
-	Cur_OneSlot            interface{} `json:"Cur_OneSlot,omitempty"`
-	Cur_NoSlotsOrBothSlots string      `json:"Cur_NoSlotsOrBothSlots,omitempty"`
-}
-
-type StopConferenceIntent struct {
-	PN         string `json:"PN,omitempty"`
-	BeAnywhere string `json:"BeAnywhere,omitempty"`
-	NoSlots    string `json:"NoSlots,omitempty"`
-}
-*/
-
 //<a href="https://www.iconfinder.com/icons/309047/conference_group_people_users_icon" target="_blank">"Conference, group, people, users icon"</a> by <a href="https://www.iconfinder.com/visualpharm" target="_blank">Ivan Boyko</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>
 //"Conference, group, people, users icon" (https://www.iconfinder.com/icons/309047/conference_group_people_users_icon) by Ivan Boyko (https://www.iconfinder.com/visualpharm) is licensed under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0)
 var conferenceImg CardImg = CardImg{
@@ -230,5 +181,65 @@ func FormatPN(PN string) string {
 	}
 
 	return PNFormatted
+
+}
+
+func BeAnywhereHomomyn(BeAnywhere string) string {
+
+	switch BeAnywhere {
+
+	case "sell":
+		return "cell"
+	case "sale":
+		return "cell"
+
+	}
+
+	return BeAnywhere
+
+}
+
+func BeAnywhereNum(BeAnywhere string, Num string) string {
+
+	return BeAnywhere + " " + Num
+
+}
+
+func BeAnywhereNumCheck(BeAnywhere string, NumCheck string) string {
+
+	if NumCheck == "to" || NumCheck == "too" {
+		return BeAnywhere + " " + "2"
+	}
+
+	return BeAnywhere + " " + "UNKNOWN"
+
+}
+
+func BeAnywhereOrdinal(BeAnywhere string, Ordinal string) string {
+
+	switch Ordinal {
+
+	case "1":
+		return "first" + " " + BeAnywhere
+	case "2":
+		return "second" + " " + BeAnywhere
+	case "3":
+		return "third" + " " + BeAnywhere
+	case "4":
+		return "fourth" + " " + BeAnywhere
+	case "5":
+		return "fifth" + " " + BeAnywhere
+	case "6":
+		return "sixth" + " " + BeAnywhere
+	case "7":
+		return "seventh" + " " + BeAnywhere
+	case "8":
+		return "eighth" + " " + BeAnywhere
+	case "9":
+		return "ninth" + " " + BeAnywhere
+
+	}
+
+	return "UNKNOWN" + " " + BeAnywhere
 
 }
