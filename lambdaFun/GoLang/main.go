@@ -22,6 +22,12 @@ func Handler(request alexa.Request) (alexa.Response, error) {
 		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable USERINFO_DEBUG_EN is either 0 or not set\r")
 	}
 
+	if os.Getenv("LOGTRACE_DEBUG_EN") == "1" {
+		alexa.SetDebugLogTrace(true)
+	} else {
+		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable LOGTRACE_DEBUG_EN is either 0 or not set\r")
+	}
+
 	if os.Getenv("OPTIONS_DEBUG_EN") == "1" {
 		alexa.SetDebugOptions(true)
 	} else {
@@ -72,7 +78,9 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 
 	options["endSession"] = true
 
-	alexa.LogObject("Trace", LogTrace)
+	if alexa.GetDebugLogTrace() {
+		alexa.LogObject("Trace", LogTrace)
+	}
 
 	return alexa.BuildResponse(options)
 
@@ -178,7 +186,9 @@ func HandleStartConferenceIntent(request alexa.Request) alexa.Response {
 
 	}
 
-	alexa.LogObject("Trace", LogTrace)
+	if alexa.GetDebugLogTrace() {
+		alexa.LogObject("Trace", LogTrace)
+	}
 
 	return alexa.BuildResponse(options)
 
@@ -338,7 +348,9 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 
 	}
 
-	alexa.LogObject("Trace", LogTrace)
+	if alexa.GetDebugLogTrace() {
+		alexa.LogObject("Trace", LogTrace)
+	}
 
 	return alexa.BuildResponse(options)
 
@@ -428,7 +440,9 @@ func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 
 	options["endSession"] = true
 
-	alexa.LogObject("Trace", LogTrace)
+	if alexa.GetDebugLogTrace() {
+		alexa.LogObject("Trace", LogTrace)
+	}
 
 	return alexa.BuildResponse(options)
 

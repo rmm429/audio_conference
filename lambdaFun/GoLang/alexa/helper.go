@@ -10,6 +10,7 @@ import (
 
 var debugGo = false
 var debugUserInfo = false
+var debugLogTrace = false
 var debugOptions = false
 
 type CardImg struct {
@@ -66,6 +67,14 @@ func GetDebugUserInfo() bool {
 
 func SetDebugUserInfo(dui bool) {
 	debugUserInfo = dui
+}
+
+func GetDebugLogTrace() bool {
+	return debugLogTrace
+}
+
+func SetDebugLogTrace(dlt bool) {
+	debugLogTrace = dlt
 }
 
 func GetDebugOptions() bool {
