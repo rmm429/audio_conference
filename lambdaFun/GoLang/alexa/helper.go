@@ -2,7 +2,9 @@ package alexa
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"reflect"
 	"strconv"
 )
 
@@ -15,6 +17,7 @@ type CardImg struct {
 	Large string
 }
 
+/*
 type LogTrace struct {
 	LaunchRequest               string      `json:"LaunchRequest,omitempty"`
 	StartConferenceIntent       interface{} `json:"StartConferenceIntent,omitempty"`
@@ -48,7 +51,7 @@ type SessionAttributes struct {
 }
 
 type Previous_PN_VerifyFalse struct {
-	Cur_PN interface{} `json:"Cur_Device,omitempty"`
+	Cur_PN interface{} `json:"Cur_PN,omitempty"`
 }
 
 type Previous_NoSlotsOrInvalid struct {
@@ -61,6 +64,7 @@ type StopConferenceIntent struct {
 	BeAnywhere string `json:"BeAnywhere,omitempty"`
 	NoSlots    string `json:"NoSlots,omitempty"`
 }
+*/
 
 //<a href="https://www.iconfinder.com/icons/309047/conference_group_people_users_icon" target="_blank">"Conference, group, people, users icon"</a> by <a href="https://www.iconfinder.com/visualpharm" target="_blank">Ivan Boyko</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0" target="_blank">CC BY 3.0</a>
 //"Conference, group, people, users icon" (https://www.iconfinder.com/icons/309047/conference_group_people_users_icon) by Ivan Boyko (https://www.iconfinder.com/visualpharm) is licensed under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0)
@@ -143,7 +147,24 @@ func GetQuestionImg() CardImg {
 
 func LogObject(identifier string, obj interface{}) {
 
-	if obj != nil {
+	var objDataType = reflect.TypeOf(obj)
+	var objType = objDataType.String()
+
+	if objType == "string" {
+
+		//Enabling the return escape character
+		var separator string
+		_, err := fmt.Sscanf(`"{$obj}"`, "%q", &separator)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		//Enabling the space character
+		var o = ReplaceSpace(obj.(string))
+
+		log.Printf("\r"+identifier+":\r%s", o)
+
+	} else if obj != nil {
 
 		o, err := json.Marshal(obj)
 		if err != nil {
@@ -156,6 +177,20 @@ func LogObject(identifier string, obj interface{}) {
 		log.Print("\r" + identifier)
 	}
 
+}
+
+//Convert normal space/whitespace to non-breaking space
+func ReplaceSpace(s string) string {
+	var result []rune
+	const badSpace = '\u0020'
+	for _, r := range s {
+		if r == badSpace {
+			result = append(result, '\u00A0')
+			continue
+		}
+		result = append(result, r)
+	}
+	return string(result)
 }
 
 func VerifyPN(PN string) bool {

@@ -45,7 +45,8 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 	var options map[string]interface{}
 	options = make(map[string]interface{})
 
-	var LogTrace alexa.LogTrace
+	//var LogTrace alexa.LogTrace
+	var LogTrace = `LaunchRequest has been invoked`
 
 	var speechText = "Welcome to the Audio Conference skill.  "
 	speechText += "You can say, for example, "
@@ -69,9 +70,13 @@ func HandleLaunchRequest(request alexa.Request) alexa.Response {
 
 	options["endSession"] = true
 
-	LogTrace = alexa.LogTrace{
-		LaunchRequest: "success",
-	}
+	/*
+		LogTrace = alexa.LogTrace{
+			LaunchRequest: "success",
+		}
+
+		alexa.LogObject("Trace", LogTrace)
+	*/
 
 	alexa.LogObject("Trace", LogTrace)
 
@@ -84,7 +89,8 @@ func HandleStartConferenceIntent(request alexa.Request) alexa.Response {
 	var options map[string]interface{}
 	options = make(map[string]interface{})
 
-	var LogTrace alexa.LogTrace
+	//var LogTrace alexa.LogTrace
+	var LogTrace = "\rStartConference has been invoked"
 
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
@@ -93,82 +99,113 @@ func HandleStartConferenceIntent(request alexa.Request) alexa.Response {
 	//Only one slot is filled
 	if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
 
+		LogTrace += "\r     "
+		LogTrace += "One slot has been filled"
+
 		//A phone number is provided
 		if PNCur != "" {
+
+			LogTrace += "\r          "
+			LogTrace += "A phone number has been provided"
 
 			//The phone number passed verification
 			if alexa.VerifyPN(PNCur) {
 
+				LogTrace += "\r               "
+				LogTrace += "The phone number has passed verification"
+
 				//PN_Pass
 				options = OptionTemplates("PN_Pass", request, PNCur)
 
-				LogTrace = alexa.LogTrace{
-					StartConferenceIntent: alexa.StartConferenceIntent{
-						OneSlot: alexa.OneSlot{
-							PN: alexa.PN{
-								Verify: "valid",
+				/*
+					LogTrace = alexa.LogTrace{
+						StartConferenceIntent: alexa.StartConferenceIntent{
+							OneSlot: alexa.OneSlot{
+								PN: alexa.PN{
+									Verify: "valid",
+								},
 							},
 						},
-					},
-				}
+					}
+				*/
 
 				//The phone number failed verification
 			} else {
 
+				LogTrace += "\r               "
+				LogTrace += "The phone number has failed verification"
+
 				//PN_Fail
 				options = OptionTemplates("PN_Fail", request, "")
 
-				LogTrace = alexa.LogTrace{
-					StartConferenceIntent: alexa.StartConferenceIntent{
-						OneSlot: alexa.OneSlot{
-							PN: alexa.PN{
-								Verify: "invalid",
+				/*
+					LogTrace = alexa.LogTrace{
+						StartConferenceIntent: alexa.StartConferenceIntent{
+							OneSlot: alexa.OneSlot{
+								PN: alexa.PN{
+									Verify: "invalid",
+								},
 							},
 						},
-					},
-				}
+					}
+				*/
 
 			}
 
 			//A Be Anywhere device was provided
 		} else if BeAnywhereCur != "" {
 
+			LogTrace += "\r          "
+			LogTrace += "A Be Anywhere device has been provided"
+
 			//BeAnywhere
 			options = OptionTemplates("BeAnywhere", request, BeAnywhereCur)
 
-			LogTrace = alexa.LogTrace{
-				StartConferenceIntent: alexa.StartConferenceIntent{
-					OneSlot: alexa.OneSlot{
-						BeAnywhere: "yes",
+			/*
+				LogTrace = alexa.LogTrace{
+					StartConferenceIntent: alexa.StartConferenceIntent{
+						OneSlot: alexa.OneSlot{
+							BeAnywhere: "yes",
+						},
 					},
-				},
-			}
+				}
+			*/
 
 		}
 
 		//Both slots are empty
 	} else if PNCur == "" && BeAnywhereCur == "" {
 
+		LogTrace += "\r     "
+		LogTrace += "Neither slot has been filled"
+
 		//Start_BothEmpty
 		options = OptionTemplates("Start_BothEmpty", request, "")
 
-		LogTrace = alexa.LogTrace{
-			StartConferenceIntent: alexa.StartConferenceIntent{
-				NoSlots: "yes",
-			},
-		}
+		/*
+			LogTrace = alexa.LogTrace{
+				StartConferenceIntent: alexa.StartConferenceIntent{
+					NoSlots: "yes",
+				},
+			}
+		*/
 
 		//Both slots are filled
 	} else {
 
+		LogTrace += "\r     "
+		LogTrace += "Both slots have been filled"
+
 		//Invalid
 		options = OptionTemplates("Invalid", request, "")
 
-		LogTrace = alexa.LogTrace{
-			StartConferenceIntent: alexa.StartConferenceIntent{
-				BothSlots: "yes",
-			},
-		}
+		/*
+			LogTrace = alexa.LogTrace{
+				StartConferenceIntent: alexa.StartConferenceIntent{
+					BothSlots: "yes",
+				},
+			}
+		*/
 
 	}
 
@@ -183,10 +220,14 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 	var options map[string]interface{}
 	options = make(map[string]interface{})
 
-	var LogTrace alexa.LogTrace
+	//var LogTrace alexa.LogTrace
+	var LogTrace = "\rStartConferenceDeviceIntent has been invoked"
 
 	//If session attributes exist and this intent was invoked by the intent StartConferenceIntent
 	if request.Session.Attributes != nil && request.Session.Attributes["startConferenceIntent"] == true {
+
+		LogTrace += "\r     "
+		LogTrace += "In the current request, session attributes exist and this intent was invoked by StartConferenceIntent"
 
 		slots := request.Body.Intent.Slots
 		PNCur := slots["PN"].Value
@@ -195,41 +236,54 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 		//Previously, a phone number was provided alongside the intent StartConferenceIntent and failed verification
 		if _, ok := request.Session.Attributes["isPN"]; ok {
 
+			LogTrace += "\r          "
+			LogTrace += "In the previous request, a phone number was provided but failed verification"
+
 			//If the slot is perceived as a phone number and passes verification
 			if PNCur != "" && alexa.VerifyPN(PNCur) {
+
+				LogTrace += "\r               "
+				LogTrace += "In the current request, the phone number has passed verification"
 
 				//PN_Pass
 				options = OptionTemplates("PN_Pass", request, PNCur)
 
-				LogTrace = alexa.LogTrace{
-					StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-						SessionAttributes: alexa.SessionAttributes{
-							Previous_PN_VerifyFalse: alexa.Previous_PN_VerifyFalse{
-								Cur_PN: alexa.PN{
-									Verify: "valid",
+				/*
+					LogTrace = alexa.LogTrace{
+						StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
+							SessionAttributes: alexa.SessionAttributes{
+								Previous_PN_VerifyFalse: alexa.Previous_PN_VerifyFalse{
+									Cur_PN: alexa.PN{
+										Verify: "valid",
+									},
 								},
 							},
 						},
-					},
-				}
+					}
+				*/
 
-				//If the slot is perceived as a BeAnywhere device OR the slot is perceived as a phone number but fails verification
+				//If the slot is perceived as a Be Anywhere device OR the slot is perceived as a phone number but fails verification
 			} else {
+
+				LogTrace += "\r               "
+				LogTrace += "In the current request, the phone number has failed verificaiton"
 
 				//PN_Fail
 				options = OptionTemplates("PN_Fail", request, "")
 
-				LogTrace = alexa.LogTrace{
-					StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-						SessionAttributes: alexa.SessionAttributes{
-							Previous_PN_VerifyFalse: alexa.Previous_PN_VerifyFalse{
-								Cur_PN: alexa.PN{
-									Verify: "invalid",
+				/*
+					LogTrace = alexa.LogTrace{
+						StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
+							SessionAttributes: alexa.SessionAttributes{
+								Previous_PN_VerifyFalse: alexa.Previous_PN_VerifyFalse{
+									Cur_PN: alexa.PN{
+										Verify: "invalid",
+									},
 								},
 							},
 						},
-					},
-				}
+					}
+				*/
 
 				//IN CASE OF ERROR: DO NOT copy over Session Attributes in this block
 				//Explicitly empty Session Attributes
@@ -239,89 +293,118 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 			//Previously, no slots were provided or an invalid request was made (e.g. both slots filled)
 		} else {
 
+			LogTrace += "\r          "
+			LogTrace += "In the previous request, both slots were empty or an invalid request was made"
+
 			//One of the slots is filled
 			if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
+
+				LogTrace += "\r               "
+				LogTrace += "In the current request, one slot has been filled"
 
 				//If a phone number is provided
 				if PNCur != "" {
 
+					LogTrace += "\r                    "
+					LogTrace += "A phone number has been provided"
+
 					//If the phone number passed verification
 					if alexa.VerifyPN(PNCur) {
+
+						LogTrace += "\r                         "
+						LogTrace += "The phone number has passed verification"
 
 						//PN_Pass
 						options = OptionTemplates("PN_Pass", request, PNCur)
 
-						LogTrace = alexa.LogTrace{
-							StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-								SessionAttributes: alexa.SessionAttributes{
-									Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
-										Cur_OneSlot: alexa.OneSlot{
-											PN: alexa.PN{
-												Verify: "valid",
+						/*
+							LogTrace = alexa.LogTrace{
+								StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
+									SessionAttributes: alexa.SessionAttributes{
+										Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
+											Cur_OneSlot: alexa.OneSlot{
+												PN: alexa.PN{
+													Verify: "valid",
+												},
 											},
 										},
 									},
 								},
-							},
-						}
+							}
+						*/
 
 						//If the phone number failed verification
 					} else {
 
+						LogTrace += "\r                         "
+						LogTrace += "The phone number has failed verification"
+
 						//PN_Fail
 						options = OptionTemplates("PN_Fail", request, "")
 
-						LogTrace = alexa.LogTrace{
-							StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-								SessionAttributes: alexa.SessionAttributes{
-									Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
-										Cur_OneSlot: alexa.OneSlot{
-											PN: alexa.PN{
-												Verify: "invalid",
+						/*
+							LogTrace = alexa.LogTrace{
+								StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
+									SessionAttributes: alexa.SessionAttributes{
+										Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
+											Cur_OneSlot: alexa.OneSlot{
+												PN: alexa.PN{
+													Verify: "invalid",
+												},
 											},
 										},
 									},
 								},
-							},
-						}
+							}
+						*/
 
 					}
 
 					//If a Be Anywhere device is provided
 				} else if BeAnywhereCur != "" {
 
+					LogTrace += "\r                    "
+					LogTrace += "A BeAnywhere device has been provided"
+
 					//BeAnywhere
 					options = OptionTemplates("BeAnywhere", request, BeAnywhereCur)
 
-					LogTrace = alexa.LogTrace{
-						StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-							SessionAttributes: alexa.SessionAttributes{
-								Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
-									Cur_OneSlot: alexa.OneSlot{
-										BeAnywhere: "yes",
+					/*
+						LogTrace = alexa.LogTrace{
+							StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
+								SessionAttributes: alexa.SessionAttributes{
+									Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
+										Cur_OneSlot: alexa.OneSlot{
+											BeAnywhere: "yes",
+										},
 									},
 								},
 							},
-						},
-					}
+						}
+					*/
 
 				}
 
 				//Both slots are either empty or filled
 			} else {
 
+				LogTrace += "\r               "
+				LogTrace += "In the current request, neither slot has been filled or both slots have been filled"
+
 				//Invalid
 				options = OptionTemplates("Invalid", request, "")
 
-				LogTrace = alexa.LogTrace{
-					StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-						SessionAttributes: alexa.SessionAttributes{
-							Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
-								Cur_NoSlotsOrBothSlots: "yes",
+				/*
+					LogTrace = alexa.LogTrace{
+						StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
+							SessionAttributes: alexa.SessionAttributes{
+								Previous_NoSlotsOrInvalid: alexa.Previous_NoSlotsOrInvalid{
+									Cur_NoSlotsOrBothSlots: "yes",
+								},
 							},
 						},
-					},
-				}
+					}
+				*/
 
 			}
 
@@ -330,14 +413,19 @@ func HandleStartConferenceDeviceIntent(request alexa.Request) alexa.Response {
 		//If there are no session attributes or this intent was NOT invoked by the intent StartConferenceIntent
 	} else {
 
+		LogTrace += "\r     "
+		LogTrace += "In the current request, there are either no session attributes or this intent was not invoked by StartConferenceIntent"
+
 		//Incorrect
 		options = OptionTemplates("Incorrect", request, "")
 
-		LogTrace = alexa.LogTrace{
-			StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
-				NoSessionAttributes: "yes",
-			},
-		}
+		/*
+			LogTrace = alexa.LogTrace{
+				StartConferenceDeviceIntent: alexa.StartConferenceDeviceIntent{
+					NoSessionAttributes: "yes",
+				},
+			}
+		*/
 
 	}
 
@@ -352,13 +440,18 @@ func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 	var options map[string]interface{}
 	options = make(map[string]interface{})
 
-	var LogTrace alexa.LogTrace
+	//var LogTrace alexa.LogTrace
+	var LogTrace = "StopConferenceIntent has been invoked"
 
 	slots := request.Body.Intent.Slots
 	PNCur := slots["PN"].Value
 	BeAnywhereCur := slots["BeAnywhere"].Value
 
+	//A phone number was provided as a slot
 	if PNCur != "" {
+
+		LogTrace += "\r     "
+		LogTrace += "A phone number has been provided as a slot"
 
 		var speechText = `Your conference was stopped on <say-as interpret-as="telephone">` + PNCur + "</say-as>. "
 		options["speechText"] = speechText
@@ -366,35 +459,49 @@ func HandleStopConferenceIntent(request alexa.Request) alexa.Response {
 		var cardContent = "Your conference was stopped on " + PNCur + ". "
 		options["cardContent"] = cardContent
 
-		LogTrace = alexa.LogTrace{
-			StopConferenceIntent: alexa.StopConferenceIntent{
-				PN: "yes",
-			},
-		}
+		/*
+			LogTrace = alexa.LogTrace{
+				StopConferenceIntent: alexa.StopConferenceIntent{
+					PN: "yes",
+				},
+			}
+		*/
 
+		//A Be Anywhere device has been provided as a slot
 	} else if BeAnywhereCur != "" {
+
+		LogTrace += "\r     "
+		LogTrace += "A Be Anywhere device has been provided as a slot"
 
 		var text = "Your conference was stopped on " + BeAnywhereCur + ". "
 		options["speechText"] = text
 		options["cardContent"] = text
 
-		LogTrace = alexa.LogTrace{
-			StopConferenceIntent: alexa.StopConferenceIntent{
-				BeAnywhere: "yes",
-			},
-		}
+		/*
+			LogTrace = alexa.LogTrace{
+				StopConferenceIntent: alexa.StopConferenceIntent{
+					BeAnywhere: "yes",
+				},
+			}
+		*/
 
+		//Neither slot was filled
 	} else {
+
+		LogTrace += "\r     "
+		LogTrace += "Neither slot has been filled"
 
 		var text = "Your conference was stopped. "
 		options["speechText"] = text
 		options["cardContent"] = text
 
-		LogTrace = alexa.LogTrace{
-			StopConferenceIntent: alexa.StopConferenceIntent{
-				NoSlots: "yes",
-			},
-		}
+		/*
+			LogTrace = alexa.LogTrace{
+				StopConferenceIntent: alexa.StopConferenceIntent{
+					NoSlots: "yes",
+				},
+			}
+		*/
 
 	}
 
