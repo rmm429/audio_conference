@@ -13,6 +13,14 @@ var debugUserInfo = false
 var debugLogTrace = false
 var debugOptions = false
 
+var UserInfo = map[string]Info{}
+
+type Info struct {
+	StartIntent bool
+	PN          string
+	BeAnywhere  string
+}
+
 type CardImg struct {
 	Small string
 	Large string
@@ -83,6 +91,34 @@ func GetDebugOptions() bool {
 
 func SetDebugOptions(do bool) {
 	debugOptions = do
+}
+
+func GetUserInfo(AmazonID string) Info {
+	return UserInfo[AmazonID]
+}
+
+func SetUserInfo(AmazonID string, StartIntent bool, PN string, BeAnywhere string) {
+
+	UserInfo[AmazonID] = Info{
+		StartIntent: StartIntent,
+		PN:          PN,
+		BeAnywhere:  BeAnywhere,
+	}
+
+}
+
+func SetUserInfoObj(AmazonID string, Info Info) {
+	UserInfo[AmazonID] = Info
+}
+
+func UserInfoExists(AmazonID string) bool {
+
+	if _, ok := UserInfo[AmazonID]; ok {
+		return true
+	}
+
+	return false
+
 }
 
 func GetConferenceImg() CardImg {
