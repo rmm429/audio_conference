@@ -126,7 +126,7 @@ func GetUserInfo(AmazonID string) Info {
 	return UserInfo[AmazonID]
 }
 
-func SetUserInfo(AmazonID string, StartIntent bool, StopIntent bool, PN string, BeAnywhere string) {
+func SetUserInfo(AmazonID string, StartIntent bool, PN string, BeAnywhere string) {
 
 	UserInfo[AmazonID] = Info{
 		StartIntent: StartIntent,
@@ -235,6 +235,8 @@ func VerifyPN(PN string) bool {
 	return false
 
 }
+
+//func HandlePN(PN string)
 
 func FormatPN(PN string) string {
 
