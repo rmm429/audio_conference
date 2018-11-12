@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"strconv"
 )
@@ -60,34 +59,6 @@ var phoneErrorImg CardImg = CardImg{
 var questionImg CardImg = CardImg{
 	Small: "https://s3.amazonaws.com/audio-conference/images/questionSmall.png",
 	Large: "https://s3.amazonaws.com/audio-conference/images/questionLarge.png",
-}
-
-func SetDebugInfo() {
-
-	if os.Getenv("GO_DEBUG_EN") == "1" {
-		SetDebugGo(true)
-	} else {
-		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable GO_DEBUG_EN is either 0 or not set\r")
-	}
-
-	if os.Getenv("USERINFO_DEBUG_EN") == "1" {
-		SetDebugUserInfo(true)
-	} else {
-		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable USERINFO_DEBUG_EN is either 0 or not set\r")
-	}
-
-	if os.Getenv("LOGTRACE_DEBUG_EN") == "1" {
-		SetDebugLogTrace(true)
-	} else {
-		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable LOGTRACE_DEBUG_EN is either 0 or not set\r")
-	}
-
-	if os.Getenv("OPTIONS_DEBUG_EN") == "1" {
-		SetDebugOptions(true)
-	} else {
-		log.Print("\r*DEBUG LOG OFF*\rEnvironment Variable OPTIONS_DEBUG_EN is either 0 or not set\r")
-	}
-
 }
 
 func GetDebugGo() bool {
@@ -235,8 +206,6 @@ func VerifyPN(PN string) bool {
 	return false
 
 }
-
-//func HandlePN(PN string)
 
 func FormatPN(PN string) string {
 
