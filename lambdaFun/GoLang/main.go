@@ -2,7 +2,6 @@ package main
 
 import (
 	"audio_conference/lambdaFun/GoLang/alexa"
-	"fmt"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -12,8 +11,6 @@ func main() {
 }
 
 func Handler(request alexa.Request) (alexa.Response, error) {
-
-	fmt.Print("FMT.PRINT")
 
 	alexa.SetDebugInfo()
 
@@ -30,7 +27,7 @@ func IntentDispatcher(request alexa.Request) alexa.Response {
 	var AmazonID = request.Session.User.UserID
 
 	if !(alexa.UserInfoExists(AmazonID)) {
-		alexa.SetUserInfo(AmazonID, false, "", "")
+		alexa.SetUserInfo(AmazonID, false, false, "", "")
 	}
 
 	var response alexa.Response
@@ -287,43 +284,43 @@ func HandleStopConferenceIntent(request alexa.Request, AmazonID string) alexa.Re
 
 				LogTrace += "\r               "
 				LogTrace += "A phone number has been provided as a slot"
-				LogTrace += "\r               "
-				LogTrace += "Phone number: " + PNCur
 
 				if alexa.VerifyPN(PNCur) {
 
-					//DO LogTrace HERE
+					LogTrace += "\r                    "
+					LogTrace += "The phone number has passed verification"
+					LogTrace += "\r                         "
+					LogTrace += "Phone number: " + PNCur
 
-					return OptionTemplates("PN_Pass", "Stop", request, PNCur)
+					options = OptionTemplates("PN_Pass", "Stop", request, PNCur)
 
 				} else {
 
-					return OptionTemplates("PN_Fail", "Stop", request, PNCur)
+					LogTrace += "\r                    "
+					LogTrace += "The phone number has failed verification"
+					LogTrace += "\r                         "
+					LogTrace += "Heard phone number: " + PNCur
+
+					options = OptionTemplates("PN_Fail", "Stop", request, PNCur)
 
 				}
 
 				//A Be Anywhere device has been provided as a slot
 			} else if BeAnywhereCur != "" {
 
-				return OptionTemplates("BeAnywhere", "Stop", request, BeAnywhereCur)
+				LogTrace += "\r               "
+				LogTrace += "A Be Anywhere device has been provided as a slot"
+
+				options = OptionTemplates("BeAnywhere", "Stop", request, BeAnywhereCur)
 
 			} else if info.PN != "" {
 
 				LogTrace += "\r               "
 				LogTrace += "Previously, a phone number was provided to start the conference"
 				LogTrace += "\r                    "
-				LogTrace += "Phone number: " + PNCur
+				LogTrace += "Phone number: " + info.PN
 
-				var speechText = `Your conference was stopped on <say-as interpret-as="telephone">` + info.PN + "</say-as>. "
-				options["speechText"] = speechText
-
-				var cardContent = "Your conference was stopped on " + info.PN + ". "
-				options["cardContent"] = cardContent
-
-				options["imageObj"] = alexa.GetPhoneStopImg()
-
-				var cardTitle = "Audio Conference Stop"
-				options["cardTitle"] = cardTitle
+				options = OptionTemplates("PN_Pass", "Stop", request, info.PN)
 
 			} else if info.BeAnywhere != "" {
 
@@ -332,14 +329,7 @@ func HandleStopConferenceIntent(request alexa.Request, AmazonID string) alexa.Re
 				LogTrace += "\r                    "
 				LogTrace += "Be Anywhere: " + info.BeAnywhere
 
-				var text = "Your conference was stopped on " + info.BeAnywhere + ". "
-				options["speechText"] = text
-				options["cardContent"] = text
-
-				options["imageObj"] = alexa.GetPhoneStopImg()
-
-				var cardTitle = "Audio Conference Stop"
-				options["cardTitle"] = cardTitle
+				options = OptionTemplates("BeAnywhere", "Stop", request, info.BeAnywhere)
 
 				//Neither slot was filled
 			} else {
@@ -347,17 +337,7 @@ func HandleStopConferenceIntent(request alexa.Request, AmazonID string) alexa.Re
 				LogTrace += "\r               "
 				LogTrace += "Neither slot has been filled"
 
-				var speechText = "Invalid option.  "
-				speechText += "To stop the conference, please provide a valid telephone number or BeAnywhere device. "
-				options["speechText"] = speechText
-
-				var cardContent = "Invalid option.  "
-				cardContent += "To stop the conference, please provide a valid telephone number or BeAnywhere device. "
-				options["cardContent"] = cardContent
-
-				options["imageObj"] = alexa.GetPhoneErrorImg()
-
-				options["cardTitle"] = "ERROR: Audio Conference Stop"
+				options = OptionTemplates("Invalid", "Stop", request, "")
 
 			}
 
@@ -366,6 +346,8 @@ func HandleStopConferenceIntent(request alexa.Request, AmazonID string) alexa.Re
 			LogTrace += "\r          "
 			LogTrace += "This intent was not invoked after the StartIntent was invoked"
 
+			options = OptionTemplates("Incorrect", "Stop", request, "")
+
 		}
 
 	} else {
@@ -373,17 +355,9 @@ func HandleStopConferenceIntent(request alexa.Request, AmazonID string) alexa.Re
 		LogTrace += "\r     "
 		LogTrace += "Current user info doees not exist"
 
-		options = OptionTemplates("Unknown", request, "")
-
-		options["cardTitle"] = "ERROR: Audio Conference Stop"
-
-		info.StartIntent = false
-		info.PN = ""
-		info.BeAnywhere = ""
+		options = OptionTemplates("Unknown", "Stop", request, "")
 
 	}
-
-	options["endSession"] = true
 
 	info.StartIntent = false
 	info.PN = ""
@@ -410,7 +384,7 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 
 	var info = alexa.Info{}
 
-	var LogTrace = "\rStartConferenceDeviceIntent has been invoked"
+	var LogTrace = "\rDeviceIntent has been invoked"
 
 	if alexa.UserInfoExists(AmazonID) {
 
@@ -419,11 +393,11 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 
 		info = alexa.GetUserInfo(AmazonID)
 
-		//If session attributes exist and this intent was invoked by the intent StartConferenceIntent
-		if request.Session.Attributes != nil && request.Session.Attributes["startConferenceIntent"] == true {
+		//If session attributes exist
+		if request.Session.Attributes != nil {
 
 			LogTrace += "\r          "
-			LogTrace += "In the current request, session attributes exist and this intent was invoked by StartConferenceIntent"
+			LogTrace += "In the current request, session attributes exist"
 
 			slots := request.Body.Intent.Slots
 			PNCur := slots["PN"].Value
@@ -444,7 +418,7 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 				BeAnywhereCur = alexa.BeAnywhereOrdinal(BeAnywhereCur, OrdinalCur)
 			}
 
-			//Previously, a phone number was provided alongside the intent StartConferenceIntent and failed verification
+			//Previously, a phone number was provided and failed verification
 			if _, ok := request.Session.Attributes["isPN"]; ok {
 
 				LogTrace += "\r               "
@@ -455,14 +429,38 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 
 					LogTrace += "\r                    "
 					LogTrace += "In the current request, the phone number has passed verification"
-					LogTrace += "\r                         "
-					LogTrace += "Phone number: " + PNCur
 
-					//PN_Pass
-					options = OptionTemplates("PN_Pass", request, PNCur)
+					//If the current intent was invoked by the intent StartConferenceIntent
+					if request.Session.Attributes["startConferenceIntent"] == true {
 
-					info.StartIntent = true
-					info.PN = PNCur
+						LogTrace += "\r                         "
+						LogTrace += "The current intent was invoked by StartConferenceIntent"
+						LogTrace += "\r                              "
+						LogTrace += "Phone number: " + PNCur
+
+						//PN_Pass
+						options = OptionTemplates("PN_Pass", "Start", request, PNCur)
+
+						info.StartIntent = true
+						info.PN = PNCur
+
+						//If the current intent was invoked by the intent StopConferenceIntent
+					} else if request.Session.Attributes["stopConferenceIntent"] == true {
+
+						LogTrace += "\r                         "
+						LogTrace += "The current intent was invoked by StopConferenceIntent"
+						LogTrace += "\r                              "
+						LogTrace += "Phone number: " + PNCur
+
+						//PN_Pass
+						options = OptionTemplates("PN_Pass", "Stop", request, PNCur)
+
+						info.PN = PNCur
+
+						//If the current intent was not invoked by either of the intents StartConferenceIntent or StopConferenceIntent
+					} else {
+
+					}
 
 					//If the slot is perceived as a Be Anywhere device OR the slot is perceived as a phone number but fails verification
 				} else {
@@ -470,26 +468,51 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 					LogTrace += "\r                    "
 					LogTrace += "In the current request, the phone number has failed verificaiton"
 
-					LogTrace += "\r                         "
-					if PNCur != "" {
-						LogTrace += "Heard phone number: " + PNCur
-					} else {
-						LogTrace += "Heard phone number: " + BeAnywhereCur
-					}
+					//If the current intent was invoked by the intent StartConferenceIntent
+					if request.Session.Attributes["startConferenceIntent"] == true {
 
-					//PN_Fail
-					options = OptionTemplates("PN_Fail", request, "")
+						LogTrace += "\r                         "
+						LogTrace += "The current intent was invoked by StartConferenceIntent"
+						LogTrace += "\r                              "
+						if PNCur != "" {
+							LogTrace += "Heard phone number: " + PNCur
+						} else {
+							LogTrace += "Heard phone number: " + BeAnywhereCur
+						}
+
+						//PN_Pass
+						options = OptionTemplates("PN_Fail", "Start", request, "")
+
+						//If the current intent was invoked by the intent StopConferenceIntent
+					} else if request.Session.Attributes["stopConferenceIntent"] == true {
+
+						LogTrace += "\r                         "
+						LogTrace += "The current intent was invoked by StopConferenceIntent"
+						LogTrace += "\r                              "
+						if PNCur != "" {
+							LogTrace += "Heard phone number: " + PNCur
+						} else {
+							LogTrace += "Heard phone number: " + BeAnywhereCur
+						}
+
+						//PN_Pass
+						options = OptionTemplates("PN_Fail", "Stop", request, "")
+
+						//If the current intent was not invoked by either of the intents StartConferenceIntent or StopConferenceIntent
+					} else {
+
+					}
 
 					//IN CASE OF ERROR: DO NOT copy over Session Attributes in this block
 					//Explicitly empty Session Attributes
 
 				}
 
-				//Previously, no slots were provided or an invalid request was made (e.g. both slots filled)
+				//Previously, either no slots were provided or an invalid request was made (e.g. both slots filled)
 			} else {
 
 				LogTrace += "\r               "
-				LogTrace += "In the previous request, both slots were empty or an invalid request was made"
+				LogTrace += "In the previous request, no slots were provided or an invalid request was made"
 
 				//One of the slots is filled
 				if (PNCur == "" && BeAnywhereCur != "") || (PNCur != "" && BeAnywhereCur == "") {
@@ -511,22 +534,75 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 							LogTrace += "\r                                   "
 							LogTrace += "Phone number: " + PNCur
 
-							//PN_Pass
-							options = OptionTemplates("PN_Pass", request, PNCur)
+							//If the current intent was invoked by the intent StartConferenceIntent
+							if request.Session.Attributes["startConferenceIntent"] == true {
 
-							info.StartIntent = true
-							info.PN = PNCur
+								LogTrace += "\r                                   "
+								LogTrace += "The current intent was invoked by StartConferenceIntent"
+								LogTrace += "\r                                        "
+								LogTrace += "Phone number: " + PNCur
+
+								//PN_Pass
+								options = OptionTemplates("PN_Pass", "Start", request, PNCur)
+
+								info.StartIntent = true
+								info.PN = PNCur
+
+								//If the current intent was invoked by the intent StopConferenceIntent
+							} else if request.Session.Attributes["stopConferenceIntent"] == true {
+
+								LogTrace += "\r                                   "
+								LogTrace += "The current intent was invoked by StartConferenceIntent"
+								LogTrace += "\r                                        "
+								LogTrace += "Phone number: " + PNCur
+
+								//PN_Pass
+								options = OptionTemplates("PN_Pass", "Stop", request, PNCur)
+
+								info.PN = PNCur
+
+								//If the current intent was not invoked by either of the intents StartConferenceIntent or StopConferenceIntent
+							} else {
+
+							}
 
 							//If the phone number failed verification
 						} else {
 
-							LogTrace += "\r                              "
-							LogTrace += "The phone number has failed verification"
-							LogTrace += "\r                                   "
-							LogTrace += "Heard phone number: " + PNCur
+							//If the current intent was invoked by the intent StartConferenceIntent
+							if request.Session.Attributes["startConferenceIntent"] == true {
 
-							//PN_Fail
-							options = OptionTemplates("PN_Fail", request, "")
+								LogTrace += "\r                                   "
+								LogTrace += "The current intent was invoked by StartConferenceIntent"
+								LogTrace += "\r                                        "
+								if PNCur != "" {
+									LogTrace += "Heard phone number: " + PNCur
+								} else {
+									LogTrace += "Heard phone number: " + BeAnywhereCur
+								}
+
+								//PN_Fail
+								options = OptionTemplates("PN_Fail", "Start", request, "")
+
+								//If the current intent was invoked by the intent StopConferenceIntent
+							} else if request.Session.Attributes["stopConferenceIntent"] == true {
+
+								LogTrace += "\r                                   "
+								LogTrace += "The current intent was invoked by StartConferenceIntent"
+								LogTrace += "\r                                        "
+								if PNCur != "" {
+									LogTrace += "Heard phone number: " + PNCur
+								} else {
+									LogTrace += "Heard phone number: " + BeAnywhereCur
+								}
+
+								//PN_Fail
+								options = OptionTemplates("PN_Fail", "Stop", request, "")
+
+								//If the current intent was not invoked by either of the intents StartConferenceIntent or StopConferenceIntent
+							} else {
+
+							}
 
 						}
 
@@ -535,14 +611,36 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 
 						LogTrace += "\r                         "
 						LogTrace += "A Be Anywhere device has been provided"
-						LogTrace += "\r                              "
-						LogTrace += "Be Anywhere device: " + BeAnywhereCur
 
-						//BeAnywhere
-						options = OptionTemplates("BeAnywhere", request, BeAnywhereCur)
+						//If the current intent was invoked by the intent StartConferenceIntent
+						if request.Session.Attributes["startConferenceIntent"] == true {
 
-						info.StartIntent = true
-						info.BeAnywhere = BeAnywhereCur
+							LogTrace += "\r                              "
+							LogTrace += "The current intent was invoked by StartConferenceIntent"
+							LogTrace += "\r                                   "
+							LogTrace += "Be Anywhere device: " + BeAnywhereCur
+
+							//BeAnywhere
+							options = OptionTemplates("BeAnywhere", "Start", request, BeAnywhereCur)
+
+							info.StartIntent = true
+							info.BeAnywhere = BeAnywhereCur
+
+							//If the current intent was invoked by the intent StopConferenceIntent
+						} else if request.Session.Attributes["stopConferenceIntent"] == true {
+
+							LogTrace += "\r                              "
+							LogTrace += "The current intent was invoked by StopConferenceIntent"
+							LogTrace += "\r                                   "
+							LogTrace += "Be Anywhere device: " + BeAnywhereCur
+
+							//BeAnywhere
+							options = OptionTemplates("BeAnywhere", "Stop", request, BeAnywhereCur)
+
+							//If the current intent was not invoked by either of the intents StartConferenceIntent or StopConferenceIntent
+						} else {
+
+						}
 
 					}
 
@@ -551,26 +649,70 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 
 					LogTrace += "\r                    "
 					LogTrace += "In the current request, neither slot has been filled or both slots have been filled"
-					LogTrace += "\r                         "
-					LogTrace += "Heard phone number: " + PNCur
-					LogTrace += "\r                         "
-					LogTrace += "Heard Be Anywhere device: " + BeAnywhereCur
 
-					//Invalid
-					options = OptionTemplates("Invalid", request, "")
+					//If the current intent was invoked by the intent StartConferenceIntent
+					if request.Session.Attributes["startConferenceIntent"] == true {
+
+						LogTrace += "\r                              "
+						LogTrace += "The current intent was invoked by StartConferenceIntent"
+						LogTrace += "\r                                   "
+						LogTrace += "Heard phone number: " + PNCur
+						LogTrace += "\r                                   "
+						LogTrace += "Heard Be Anywhere device: " + BeAnywhereCur
+
+						//Invalid
+						options = OptionTemplates("Invalid", "Start", request, "")
+
+						//If the current intent was invoked by the intent StopConferenceIntent
+					} else if request.Session.Attributes["stopConferenceIntent"] == true {
+
+						LogTrace += "\r                              "
+						LogTrace += "The current intent was invoked by StopConferenceIntent"
+						LogTrace += "\r                                   "
+						LogTrace += "Heard phone number: " + PNCur
+						LogTrace += "\r                                   "
+						LogTrace += "Heard Be Anywhere device: " + BeAnywhereCur
+
+						//Invalid
+						options = OptionTemplates("Invalid", "Start", request, "")
+
+						//If the current intent was not invoked by either of the intents StartConferenceIntent or StopConferenceIntent
+					} else {
+
+					}
 
 				}
 
 			}
 
-			//If there are no session attributes, this intent was NOT invoked by the intent StartConferenceIntent, or an invalid request has been made
+			//If there are no session attributes, this intent was NOT invoked by either of the intents StartConferenceIntent or StartConferenceIntent, or an invalid request has been made
 		} else {
 
 			LogTrace += "\r          "
-			LogTrace += "In the current request, there are either no session attributes, this intent was not invoked by StartConferenceIntent, or an invalid request has been made"
+			LogTrace += "In the current request, there are either no session attributes, this intent was not invoked by another intent, or an invalid request has been made"
 
-			//Incorrect
-			options = OptionTemplates("Incorrect", request, "")
+			//If the current intent was invoked by the intent StartConferenceIntent
+			if request.Session.Attributes["startConferenceIntent"] == true {
+
+				LogTrace += "\r               "
+				LogTrace += "This intent was invoked by StartConferenceIntent"
+
+				//Incorrect
+				options = OptionTemplates("Incorrect", "Start", request, "")
+
+				//If the current intent was invoked by the intent StopConferenceIntent
+			} else if request.Session.Attributes["stopConferenceIntent"] == true {
+
+				LogTrace += "\r               "
+				LogTrace += "This intent was invoked by StartConferenceIntent"
+
+				//Incorrect
+				options = OptionTemplates("Incorrect", "Start", request, "")
+
+				//If the current intent was not invoked by either of the intents StartConferenceIntent or StopConferenceIntent
+			} else {
+
+			}
 
 		}
 
@@ -579,7 +721,7 @@ func HandleDeviceIntent(request alexa.Request, AmazonID string) alexa.Response {
 		LogTrace += "\r     "
 		LogTrace += "Current user info does not exist"
 
-		options = OptionTemplates("Unknown", request, "")
+		options = OptionTemplates("Unknown", "", request, "")
 
 		options["cardTitle"] = "ERROR: Audio Conference Start"
 
@@ -729,7 +871,7 @@ func OptionTemplates(name string, intent string, request alexa.Request, deviceCu
 	case "BeAnywhere":
 
 		//Coming from the intent StartConferenceIntent
-		if intet == "Start" {
+		if intent == "Start" {
 
 			var speechText = "Your conference was started on " + deviceCur + ". "
 			options["speechText"] = speechText
