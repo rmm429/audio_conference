@@ -119,10 +119,16 @@ func HandleStartConferenceIntent(request alexa.Request, AmazonID string) alexa.R
 		BeAnywhereCur = alexa.BeAnywhereHomomyn(BeAnywhereCur)
 
 		//Accuracy editing
-		if NumCur != "" {
+		if NumCheckCur != "" {
+
+			if PNCur != "" {
+				PNCur = alexa.NumCheckPN(NumCheckCur, PNCur)
+			} else if BeAnywhereCur != "" {
+				BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
+			}
+
+		} else if NumCur != "" {
 			BeAnywhereCur = alexa.BeAnywhereNum(BeAnywhereCur, NumCur)
-		} else if NumCheckCur != "" {
-			BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
 		} else if OrdinalCur != "" {
 			BeAnywhereCur = alexa.BeAnywhereOrdinal(BeAnywhereCur, OrdinalCur)
 		}
@@ -268,10 +274,16 @@ func HandleStartConferenceDeviceIntent(request alexa.Request, AmazonID string) a
 			BeAnywhereCur = alexa.BeAnywhereHomomyn(BeAnywhereCur)
 
 			//Accuracy editing
-			if NumCur != "" {
+			if NumCheckCur != "" {
+
+				if PNCur != "" {
+					PNCur = alexa.NumCheckPN(NumCheckCur, PNCur)
+				} else if BeAnywhereCur != "" {
+					BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
+				}
+
+			} else if NumCur != "" {
 				BeAnywhereCur = alexa.BeAnywhereNum(BeAnywhereCur, NumCur)
-			} else if NumCheckCur != "" {
-				BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
 			} else if OrdinalCur != "" {
 				BeAnywhereCur = alexa.BeAnywhereOrdinal(BeAnywhereCur, OrdinalCur)
 			}
@@ -468,10 +480,16 @@ func HandleStopConferenceIntent(request alexa.Request, AmazonID string) alexa.Re
 			BeAnywhereCur = alexa.BeAnywhereHomomyn(BeAnywhereCur)
 
 			//Accuracy editing
-			if NumCur != "" {
+			if NumCheckCur != "" {
+
+				if PNCur != "" {
+					PNCur = alexa.NumCheckPN(NumCheckCur, PNCur)
+				} else if BeAnywhereCur != "" {
+					BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
+				}
+
+			} else if NumCur != "" {
 				BeAnywhereCur = alexa.BeAnywhereNum(BeAnywhereCur, NumCur)
-			} else if NumCheckCur != "" {
-				BeAnywhereCur = alexa.BeAnywhereNumCheck(BeAnywhereCur, NumCheckCur)
 			} else if OrdinalCur != "" {
 				BeAnywhereCur = alexa.BeAnywhereOrdinal(BeAnywhereCur, OrdinalCur)
 			}

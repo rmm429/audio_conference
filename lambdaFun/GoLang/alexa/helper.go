@@ -250,14 +250,21 @@ func BeAnywhereNum(BeAnywhere string, Num string) string {
 
 }
 
-func BeAnywhereNumCheck(BeAnywhere string, NumCheck string) string {
+func NumCheckConvert(NumCheck string) string {
 
-	if NumCheck == "to" || NumCheck == "too" {
-		return BeAnywhere + " " + "2"
+	switch NumCheck {
+	case "to":
+		return "2"
+	case "too":
+		return "2"
 	}
 
-	return BeAnywhere + " " + "UNKNOWN"
+	return "UNKNOWN"
 
+}
+
+func BeAnywhereNumCheck(BeAnywhere string, NumCheck string) string {
+	return BeAnywhere + " " + NumCheckConvert(NumCheck)
 }
 
 func BeAnywhereOrdinal(BeAnywhere string, Ordinal string) string {
@@ -287,4 +294,8 @@ func BeAnywhereOrdinal(BeAnywhere string, Ordinal string) string {
 
 	return "UNKNOWN" + " " + BeAnywhere
 
+}
+
+func NumCheckPN(NumCheck string, PN string) string {
+	return NumCheckConvert(NumCheck) + PN
 }
