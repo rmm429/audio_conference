@@ -48,6 +48,7 @@
                         }
                     ],
                     "samples": [
+                        "ask audio conference to start a conference on {NumCheck} {PN}",
                         "start a conference on {Ordinal} {BeAnywhere}",
                         "start a conference on {BeAnywhere} {NumCheck}",
                         "start a conference on {BeAnywhere} {Num}",
@@ -80,6 +81,7 @@
                         }
                     ],
                     "samples": [
+                        "{NumCheck} {PN}",
                         "{Ordinal} {BeAnywhere}",
                         "{BeAnywhere} {NumCheck}",
                         "{BeAnywhere} {Num}",
@@ -112,6 +114,7 @@
                         }
                     ],
                     "samples": [
+                        "{NumCheck} {PN}",
                         "stop the conference on {Ordinal} {BeAnywhere}",
                         "stop the conference on {BeAnywhere} {NumCheck}",
                         "stop the conference on {BeAnywhere} {Num}",
